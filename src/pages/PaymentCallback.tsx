@@ -15,12 +15,13 @@ export default function PaymentCallback() {
       const trxref = searchParams.get('trxref');
       
       console.log('🔍 Payment callback received:', { reference, trxref });
+      console.log('Full URL:', window.location.href);
       
       const paymentReference = reference || trxref;
       
       if (!paymentReference) {
         toast.error('No payment reference found');
-        navigate('/events');
+        navigate('/app/events');
         return;
       }
       
@@ -34,22 +35,38 @@ export default function PaymentCallback() {
           return;
         }
 
+        console.log('Verifying payment:', paymentReference);
+        console.log('API URL:', `${API_URL}/tickets/verify/${paymentReference}`);
+
         const { data } = await axios.get(
           `${API_URL}/tickets/verify/${paymentReference}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         
+        console.log('Verification response:', data);
+        
         if (data.success) {
           toast.success('Payment successful! 🎉');
-          navigate('/my-tickets');
+          navigate('/app/my-tickets');
         } else {
           toast.error(data.message || 'Verification failed');
-          navigate('/events');
+          navigate('/app/events');
         }
       } catch (error: any) {
-        console.error('❌ Verification error:', error.response?.data);
-        toast.error(error.response?.data?.message || 'Payment verification failed');
-        navigate('/events');
+        console.error('❌ Verification error:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+        
+        // Special handling for 401
+        if (error.response?.status === 401) {
+          toast.error('Session expired. Please login again.');
+          navigate('/login');
+        } else {
+          toast.error(error.response?.data?.message || 'Payment verification failed');
+          navigate('/app/events');
+        }
       }
     };
     
