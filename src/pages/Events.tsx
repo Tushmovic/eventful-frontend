@@ -3,7 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = 'http://localhost:5000/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 interface Event {
   _id: string;
@@ -44,24 +44,28 @@ export default function Events() {
     }
   };
 
-const purchaseTicket = async (eventId: string) => {
-  try {
-    const { data } = await axios.post(
-      `${API_URL}/tickets/purchase`,
-      { eventId, quantity: 1 },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    
-    // Store the token in sessionStorage before redirecting
-    sessionStorage.setItem('paymentToken', token);
-    sessionStorage.setItem('paymentReference', data.data.reference);
-    
-    // Redirect to Paystack payment page
-    window.location.href = data.data.paymentUrl;
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || 'Purchase failed');
-  }
-};
+  const purchaseTicket = async (eventId: string) => {
+    try {
+      const { data } = await axios.post(
+        `${API_URL}/tickets/purchase`,
+        { eventId, quantity: 1 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Store the token in sessionStorage before redirecting
+      sessionStorage.setItem('paymentToken', token || '');
+      sessionStorage.setItem('paymentReference', data.data.reference);
+      
+      // ✅ FIX: Check if paymentUrl exists before redirecting
+      if (data.data.paymentUrl) {
+        window.location.href = data.data.paymentUrl;
+      } else {
+        toast.error('No payment URL received');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Purchase failed');
+    }
+  };
 
   const categories = ['All', ...new Set(events.map(e => e.category))];
   const filteredEvents = selectedCategory === 'All' 

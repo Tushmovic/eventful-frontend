@@ -1,0 +1,10 @@
+# render.yaml
+services:
+  - type: web
+    name: eventful-frontend
+    env: static
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
