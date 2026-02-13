@@ -20,7 +20,9 @@ export default function EventDetails() {
 
   const fetchEvent = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/events/${id}?incrementViews=true`);
+      const { data } = await axios.get(`${API_URL}/events/${id}?incrementViews=true`, {
+        headers: { Authorization: `Bearer ${token}` } // 🔥 FIX: Add token to request
+      });
       setEvent(data.data);
     } catch (error) {
       toast.error('Failed to load event');

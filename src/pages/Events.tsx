@@ -178,7 +178,7 @@ export default function Events() {
               key={event._id} 
               style={{ textDecoration: 'none' }}
             >
-              <div className="event-card">
+              <div className="event-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 {event.images && event.images.length > 0 ? (
                   <img 
                     src={event.images[0]} 
@@ -208,7 +208,7 @@ export default function Events() {
                 )}
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                  <h3>{event.title}</h3>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{event.title}</h3>
                   <button
                     onClick={(e) => shareEvent(event, e)}
                     style={{
@@ -228,9 +228,11 @@ export default function Events() {
                   </button>
                 </div>
                 
-                <p>{event.description.length > 100 ? `${event.description.substring(0, 100)}...` : event.description}</p>
+                <p style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                  {event.description}
+                </p>
                 
-                <div className="event-details">
+                <div className="event-details" style={{ marginTop: 'auto' }}>
                   <p>📅 {new Date(event.date).toLocaleDateString('en-NG', { 
                     weekday: 'short', 
                     year: 'numeric', 

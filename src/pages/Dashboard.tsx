@@ -16,7 +16,7 @@ export default function Dashboard() {
       title: 'Create Event',
       description: 'Create a new event and start selling tickets',
       icon: <PlusCircleIcon style={{ width: '2rem', height: '2rem' }} />,
-      link: '/create-event',
+      link: '/app/create-event', // 🔥 FIX: Added /app prefix
       color: 'var(--earth-600)',
       forCreator: true
     },
@@ -24,7 +24,7 @@ export default function Dashboard() {
       title: 'My Events',
       description: 'View and manage your created events',
       icon: <CalendarIcon style={{ width: '2rem', height: '2rem' }} />,
-      link: '/events',
+      link: '/app/events', // 🔥 FIX: Added /app prefix
       color: 'var(--sage-500)',
       forCreator: true
     },
@@ -32,7 +32,7 @@ export default function Dashboard() {
       title: 'Verify Tickets',
       description: 'Scan QR codes and verify your event tickets',
       icon: <QrCodeIcon style={{ width: '2rem', height: '2rem' }} />,
-      link: '/verify',
+      link: '/app/verify', // 🔥 FIX: Added /app prefix
       color: 'var(--terracotta-500)',
       forCreator: true
     },
@@ -40,7 +40,7 @@ export default function Dashboard() {
       title: 'Browse Events',
       description: 'Discover and book upcoming events',
       icon: <CalendarIcon style={{ width: '2rem', height: '2rem' }} />,
-      link: '/events',
+      link: '/app/events', // 🔥 FIX: Added /app prefix
       color: 'var(--earth-600)',
       forCreator: false
     },
@@ -48,7 +48,7 @@ export default function Dashboard() {
       title: 'My Tickets',
       description: 'View your purchased tickets and QR codes',
       icon: <TicketIcon style={{ width: '2rem', height: '2rem' }} />,
-      link: '/my-tickets',
+      link: '/app/my-tickets', // 🔥 FIX: Added /app prefix
       color: 'var(--sage-500)',
       forCreator: false
     }
@@ -160,7 +160,7 @@ export default function Dashboard() {
           </div>
         </div>
         <Link 
-          to="/analytics"
+          to="/app/analytics" // 🔥 FIX: Added /app prefix
           style={{
             display: 'inline-block',
             padding: '0.5rem 1rem',
