@@ -1,10 +1,9 @@
-# render.yaml
 services:
   - type: web
     name: eventful-frontend
     env: static
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        sync: false
+        value: https://eventful-backend-vase.onrender.com/api/v1
