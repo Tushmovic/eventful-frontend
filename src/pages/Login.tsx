@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Add this
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Add this
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/events');
+      navigate('/app/dashboard'); // Updated path
     } catch (error) {
       // Error handled in context
     } finally {
@@ -25,9 +27,11 @@ export default function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div style={{ textAlign: 'center', fontSize: '4rem', marginBottom: '0.5rem' }}>🎭</div>
+        <div style={{ textAlign: 'center', fontSize: '3.5rem', marginBottom: '0.5rem' }}>🎭</div>
         <h2>Alaya Eventful</h2>
-        <p>Welcome back! Please sign in to continue.</p>
+        <p style={{ marginBottom: '2rem', color: 'var(--secondary-600)' }}>
+          Welcome back! Please sign in to continue.
+        </p>
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -44,14 +48,34 @@ export default function Login() {
 
           <div className="form-group">
             <label>🔒 Password</label>
-            <input
-              type="password"
-              className="form-control"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--earth-600)',
+                  fontSize: '1.2rem'
+                }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
           <button
@@ -64,7 +88,7 @@ export default function Login() {
           </button>
         </form>
 
-        <p style={{ marginTop: '2rem', marginBottom: '0' }}>
+        <p>
           Don't have an account?{' '}
           <Link to="/register" className="link">
             Create account

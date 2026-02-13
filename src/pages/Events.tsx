@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -52,11 +53,9 @@ export default function Events() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      // Store the token in sessionStorage before redirecting
       sessionStorage.setItem('paymentToken', token || '');
       sessionStorage.setItem('paymentReference', data.data.reference);
       
-      // ✅ FIX: Check if paymentUrl exists before redirecting
       if (data.data.paymentUrl) {
         window.location.href = data.data.paymentUrl;
       } else {
@@ -64,6 +63,53 @@ export default function Events() {
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Purchase failed');
+    }
+  };
+
+  const shareEvent = async (event: Event, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      await axios.post(`${API_URL}/events/${event._id}/share`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const eventUrl = `${window.location.origin}/app/events/${event._id}`;
+      const encodedUrl = encodeURIComponent(eventUrl);
+      const encodedTitle = encodeURIComponent(event.title);
+      
+      const shareLinks = {
+        twitter: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+        whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      };
+      
+      const shareWindow = window.open('', '_blank', 'width=600,height=400');
+      if (shareWindow) {
+        shareWindow.document.write(`
+          <html>
+            <head><title>Share Event</title></head>
+            <body style="font-family: Arial, sans-serif; padding: 20px; background: var(--earth-50);">
+              <h2 style="color: var(--earth-800);">Share this event</h2>
+              <p><strong>${event.title}</strong></p>
+              <div style="display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
+                <a href="${shareLinks.facebook}" target="_blank" style="padding: 10px 20px; background: #1877f2; color: white; text-decoration: none; border-radius: 5px;">Facebook</a>
+                <a href="${shareLinks.twitter}" target="_blank" style="padding: 10px 20px; background: #1da1f2; color: white; text-decoration: none; border-radius: 5px;">Twitter</a>
+                <a href="${shareLinks.whatsapp}" target="_blank" style="padding: 10px 20px; background: #25D366; color: white; text-decoration: none; border-radius: 5px;">WhatsApp</a>
+                <a href="${shareLinks.linkedin}" target="_blank" style="padding: 10px 20px; background: #0a66c2; color: white; text-decoration: none; border-radius: 5px;">LinkedIn</a>
+              </div>
+              <p>Or copy this link: <input type="text" value="${eventUrl}" style="width: 300px; padding: 5px;" readonly /></p>
+              <button onclick="window.close()" style="padding: 8px 16px; margin-top: 10px; background: var(--earth-600); color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+            </body>
+          </html>
+        `);
+      }
+      
+      toast.success('Event shared! 🎉');
+    } catch (error) {
+      toast.error('Failed to share event');
     }
   };
 
@@ -127,64 +173,93 @@ export default function Events() {
       ) : (
         <div className="events-grid">
           {filteredEvents.map(event => (
-            <div key={event._id} className="event-card">
-              {event.images && event.images.length > 0 ? (
-                <img 
-                  src={event.images[0]} 
-                  alt={event.title}
-                  style={{ 
+            <Link 
+              to={`/app/events/${event._id}`} 
+              key={event._id} 
+              style={{ textDecoration: 'none' }}
+            >
+              <div className="event-card">
+                {event.images && event.images.length > 0 ? (
+                  <img 
+                    src={event.images[0]} 
+                    alt={event.title}
+                    style={{ 
+                      width: '100%', 
+                      height: '200px', 
+                      objectFit: 'cover', 
+                      borderRadius: '0.5rem', 
+                      marginBottom: '1rem' 
+                    }}
+                  />
+                ) : (
+                  <div style={{ 
                     width: '100%', 
                     height: '200px', 
-                    objectFit: 'cover', 
-                    borderRadius: '0.5rem', 
-                    marginBottom: '1rem' 
-                  }}
-                />
-              ) : (
-                <div style={{ 
-                  width: '100%', 
-                  height: '200px', 
-                  background: 'linear-gradient(135deg, var(--primary-100), var(--primary-200))',
-                  borderRadius: '0.5rem',
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '3rem'
-                }}>
-                  🎪
+                    background: 'linear-gradient(135deg, var(--primary-100), var(--primary-200))',
+                    borderRadius: '0.5rem',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '3rem'
+                  }}>
+                    🎪
+                  </div>
+                )}
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                  <h3>{event.title}</h3>
+                  <button
+                    onClick={(e) => shareEvent(event, e)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '1.2rem',
+                      cursor: 'pointer',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary-100)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                    title="Share event"
+                  >
+                    🔗
+                  </button>
                 </div>
-              )}
-              
-              <h3>{event.title}</h3>
-              <p>{event.description.length > 100 ? `${event.description.substring(0, 100)}...` : event.description}</p>
-              
-              <div className="event-details">
-                <p>📅 {new Date(event.date).toLocaleDateString('en-NG', { 
-                  weekday: 'short', 
-                  year: 'numeric', 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}</p>
-                <p>📍 {event.location.venue}, {event.location.city}</p>
-                <p>🎫 {event.availableTickets} / {event.totalTickets} tickets left</p>
-                <p style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-700)' }}>
-                  ₦{(event.ticketPrice / 100).toLocaleString()}
-                </p>
+                
+                <p>{event.description.length > 100 ? `${event.description.substring(0, 100)}...` : event.description}</p>
+                
+                <div className="event-details">
+                  <p>📅 {new Date(event.date).toLocaleDateString('en-NG', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}</p>
+                  <p>📍 {event.location.venue}, {event.location.city}</p>
+                  <p>🎫 {event.availableTickets} / {event.totalTickets} tickets left</p>
+                  <p style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-700)' }}>
+                    ₦{(event.ticketPrice / 100).toLocaleString()}
+                  </p>
+                </div>
+                
+                <button 
+                  className="btn btn-primary btn-block"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    purchaseTicket(event._id);
+                  }}
+                  disabled={event.availableTickets === 0}
+                  style={{
+                    opacity: event.availableTickets === 0 ? 0.5 : 1,
+                    cursor: event.availableTickets === 0 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {event.availableTickets === 0 ? 'Sold Out' : 'Buy Ticket'}
+                </button>
               </div>
-              
-              <button 
-                className="btn btn-primary btn-block"
-                onClick={() => purchaseTicket(event._id)}
-                disabled={event.availableTickets === 0}
-                style={{
-                  opacity: event.availableTickets === 0 ? 0.5 : 1,
-                  cursor: event.availableTickets === 0 ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {event.availableTickets === 0 ? 'Sold Out' : 'Buy Ticket'}
-              </button>
-            </div>
+            </Link>
           ))}
         </div>
       )}

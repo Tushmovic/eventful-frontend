@@ -7,19 +7,22 @@ import { useAuth } from '../context/AuthContext';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 const CATEGORIES = [
-  'Music', 'Technology', 'Sports', 'Food & Drink', 'Arts & Theater',
-  'Business', 'Education', 'Fashion', 'Health & Wellness', 'Comedy',
-  'Festival', 'Conference', 'Workshop', 'Networking'
+  'Religious', 'Education', 'Family', 'Charity', 'Youth',
+  'Arts & Culture', 'Networking', 'Food & Drink', 'Music',
+  'Technology', 'Sports', 'Business', 'Health & Wellness', 'Comedy'
 ];
 
 export default function CreateEvent() {
   const navigate = useNavigate();
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'Music',
+    category: 'Religious',
     date: '',
     startTime: '10:00',
     endTime: '18:00',
@@ -57,19 +60,54 @@ export default function CreateEvent() {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await axios.post(
+      // First create event - send price as Naira (backend will convert to kobo)
+      const eventResponse = await axios.post(
         `${API_URL}/events`,
-        formData,
+        {
+          ...formData,
+          ticketPrice: formData.ticketPrice // User enters 5000, backend stores as 500000
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
+      const eventId = eventResponse.data.data._id;
+
+      // Upload image if selected
+      if (imageFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('images', imageFile);
+        
+        await axios.post(
+          `${API_URL}/events/${eventId}/images`,
+          imageFormData,
+          { 
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            } 
+          }
+        );
+      }
+      
       toast.success('Event created successfully! 🎉');
-      navigate('/events');
+      navigate('/app/events');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to create event');
     } finally {
@@ -90,6 +128,73 @@ export default function CreateEvent() {
         </div>
 
         <form onSubmit={handleSubmit} className="event-form">
+          {/* Image Upload Section */}
+          <div style={{ 
+            background: 'var(--white)', 
+            padding: '2rem', 
+            borderRadius: 'var(--border-radius)', 
+            boxShadow: 'var(--shadow-md)' 
+          }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--primary-700)' }}>
+              📸 Event Image
+            </h3>
+            
+            <div style={{
+              border: '2px dashed var(--earth-300)',
+              borderRadius: '12px',
+              padding: '2rem',
+              textAlign: 'center',
+              background: imagePreview ? 'none' : 'var(--earth-50)'
+            }}>
+              {imagePreview ? (
+                <div>
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    style={{ 
+                      maxWidth: '100%', 
+                      maxHeight: '200px', 
+                      borderRadius: '8px',
+                      marginBottom: '1rem'
+                    }} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview('');
+                    }}
+                    style={{ 
+                      padding: '0.5rem 1rem',
+                      background: 'var(--earth-100)',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Remove Image
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    style={{ display: 'none' }}
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload" style={{ cursor: 'pointer' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📸</div>
+                    <p style={{ color: 'var(--earth-600)' }}>Click to upload an event image</p>
+                    <p style={{ fontSize: '0.875rem', color: 'var(--earth-400)' }}>PNG, JPG up to 5MB</p>
+                  </label>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Event Information */}
           <div style={{ 
             background: 'var(--white)', 
             padding: '2rem', 
@@ -109,7 +214,7 @@ export default function CreateEvent() {
                 value={formData.title}
                 onChange={handleChange}
                 required
-                placeholder="e.g., Afro Nation Lagos 2026"
+                placeholder="e.g., Ramadan Night Market 2026"
               />
             </div>
 
@@ -176,6 +281,7 @@ export default function CreateEvent() {
             </div>
           </div>
 
+          {/* Location Details */}
           <div style={{ 
             background: 'var(--white)', 
             padding: '2rem', 
@@ -195,7 +301,7 @@ export default function CreateEvent() {
                 value={formData.location.venue}
                 onChange={handleChange}
                 required
-                placeholder="e.g., Eko Convention Centre"
+                placeholder="e.g., Lagos Central Mosque"
               />
             </div>
 
@@ -254,6 +360,7 @@ export default function CreateEvent() {
             </div>
           </div>
 
+          {/* Ticket & Pricing */}
           <div style={{ 
             background: 'var(--white)', 
             padding: '2rem', 
@@ -277,6 +384,9 @@ export default function CreateEvent() {
                   min="0"
                   placeholder="5000"
                 />
+                <small style={{ color: 'var(--earth-500)', fontSize: '0.75rem' }}>
+                  Enter price in Naira (e.g., 5000 for ₦5,000)
+                </small>
               </div>
 
               <div className="form-group">
@@ -295,6 +405,7 @@ export default function CreateEvent() {
             </div>
           </div>
 
+          {/* Organizer Information */}
           <div style={{ 
             background: 'var(--white)', 
             padding: '2rem', 
@@ -351,7 +462,7 @@ export default function CreateEvent() {
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => navigate('/events')}
+              onClick={() => navigate('/app/events')}
               disabled={loading}
             >
               Cancel

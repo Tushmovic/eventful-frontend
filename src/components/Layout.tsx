@@ -24,7 +24,7 @@ export default function Layout() {
       background: 'var(--bg-primary)',
       display: 'flex'
     }}>
-      {/* Sidebar - Earth Tones */}
+      {/* Sidebar */}
       <aside style={{
         width: '260px',
         background: 'var(--earth-800)',
@@ -75,7 +75,7 @@ export default function Layout() {
 
         {/* Navigation */}
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <Link to="/events" style={{
+          <Link to="/app/dashboard" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -97,7 +97,7 @@ export default function Layout() {
             <span>Dashboard</span>
           </Link>
 
-          <Link to="/events" style={{
+          <Link to="/app/events" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -119,7 +119,7 @@ export default function Layout() {
             <span>Events</span>
           </Link>
 
-          <Link to="/my-tickets" style={{
+          <Link to="/app/my-tickets" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -143,7 +143,7 @@ export default function Layout() {
 
           {user?.role === 'creator' && (
             <>
-              <Link to="/create-event" style={{
+              <Link to="/app/create-event" style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem',
@@ -165,7 +165,7 @@ export default function Layout() {
                 <span>Create Event</span>
               </Link>
 
-              <Link to="/analytics" style={{
+              <Link to="/app/analytics" style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem',
