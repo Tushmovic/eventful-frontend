@@ -16,7 +16,7 @@ interface Ticket {
       venue: string;
       city: string;
     };
-  };
+  } | null;  // 🔥 FIX: event can be null
   status: 'confirmed' | 'used' | 'cancelled' | 'expired';
   qrCode: string;
   purchaseDate: string;
@@ -44,6 +44,10 @@ export default function MyTickets() {
       data.data.tickets.forEach((ticket: Ticket) => {
         if (ticket.qrCode) {
           console.log(`Ticket ${ticket.ticketNumber} QR URL:`, ticket.qrCode);
+        }
+        // 🔥 DEBUG: Check for null events
+        if (!ticket.event) {
+          console.warn(`⚠️ Ticket ${ticket.ticketNumber} has no event data!`);
         }
       });
     } catch (error) {
@@ -89,13 +93,36 @@ export default function MyTickets() {
     );
   }
 
+  // Filter out tickets with null events or show a placeholder
+  const validTickets = tickets.filter(ticket => ticket.event !== null);
+  const orphanedTickets = tickets.filter(ticket => ticket.event === null);
+
   return (
     <div className="container">
       <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--secondary-900)', marginBottom: '2rem' }}>
         🎟️ My Tickets
       </h1>
 
-      {tickets.length === 0 ? (
+      {/* Show orphaned tickets warning if any */}
+      {orphanedTickets.length > 0 && (
+        <div style={{
+          background: '#fff3cd',
+          border: '1px solid #ffeeba',
+          borderRadius: '8px',
+          padding: '1rem',
+          marginBottom: '2rem',
+          color: '#856404'
+        }}>
+          <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>
+            ⚠️ Some tickets are for events that have been cancelled or removed.
+          </p>
+          <p style={{ fontSize: '0.875rem' }}>
+            {orphanedTickets.length} ticket(s) affected. Refunds have been processed.
+          </p>
+        </div>
+      )}
+
+      {validTickets.length === 0 ? (
         <div style={{ 
           textAlign: 'center', 
           padding: '4rem 2rem', 
@@ -120,10 +147,10 @@ export default function MyTickets() {
         </div>
       ) : (
         <div className="tickets-grid">
-          {tickets.map(ticket => (
+          {validTickets.map(ticket => (
             <div key={ticket._id} className="ticket-card">
               <div className="flex justify-between items-start" style={{ marginBottom: '1rem' }}>
-                <h3>{ticket.event.title}</h3>
+                <h3>{ticket.event?.title || 'Unknown Event'}</h3>
                 <span className={`status ${getStatusColor(ticket.status)}`}>
                   {getStatusText(ticket.status)}
                 </span>
@@ -134,8 +161,8 @@ export default function MyTickets() {
               </div>
               
               <div style={{ margin: '1rem 0', color: 'var(--secondary-600)', fontSize: '0.875rem' }}>
-                <p>📅 {new Date(ticket.event.date).toLocaleDateString('en-NG')}</p>
-                <p>📍 {ticket.event.location.venue}, {ticket.event.location.city}</p>
+                <p>📅 {ticket.event?.date ? new Date(ticket.event.date).toLocaleDateString('en-NG') : 'Date unavailable'}</p>
+                <p>📍 {ticket.event?.location?.venue || 'Venue unavailable'}, {ticket.event?.location?.city || ''}</p>
                 <p>💰 ₦{(ticket.price / 100).toLocaleString()}</p>
                 <p>🕐 Purchased: {new Date(ticket.purchaseDate).toLocaleDateString()}</p>
               </div>
@@ -170,7 +197,6 @@ export default function MyTickets() {
                   <button
                     onClick={() => {
                       setQrErrors(prev => ({ ...prev, [ticket._id]: false }));
-                      // Force reload the image by toggling state
                       setTimeout(() => {
                         setQrErrors(prev => ({ ...prev, [ticket._id]: false }));
                       }, 100);
