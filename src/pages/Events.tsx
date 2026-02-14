@@ -28,6 +28,7 @@ export default function Events() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [activeShareId, setActiveShareId] = useState<string | null>(null); // 🔥 NEW
   const { token, user } = useAuth();
 
   useEffect(() => {
@@ -68,52 +69,7 @@ export default function Events() {
     }
   };
 
-  const shareEvent = async (event: Event, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    try {
-      await axios.post(`${API_URL}/events/${event._id}/share`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const eventUrl = `${window.location.origin}/app/events/${event._id}`;
-      const encodedUrl = encodeURIComponent(eventUrl);
-      const encodedTitle = encodeURIComponent(event.title);
-      
-      const shareLinks = {
-        twitter: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-        whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      };
-      
-      const shareWindow = window.open('', '_blank', 'width=600,height=400');
-      if (shareWindow) {
-        shareWindow.document.write(`
-          <html>
-            <head><title>Share Event</title></head>
-            <body style="font-family: Arial, sans-serif; padding: 20px; background: var(--earth-50);">
-              <h2 style="color: var(--earth-800);">Share this event</h2>
-              <p><strong>${event.title}</strong></p>
-              <div style="display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
-                <a href="${shareLinks.facebook}" target="_blank" style="padding: 10px 20px; background: #1877f2; color: white; text-decoration: none; border-radius: 5px;">Facebook</a>
-                <a href="${shareLinks.twitter}" target="_blank" style="padding: 10px 20px; background: #1da1f2; color: white; text-decoration: none; border-radius: 5px;">Twitter</a>
-                <a href="${shareLinks.whatsapp}" target="_blank" style="padding: 10px 20px; background: #25D366; color: white; text-decoration: none; border-radius: 5px;">WhatsApp</a>
-                <a href="${shareLinks.linkedin}" target="_blank" style="padding: 10px 20px; background: #0a66c2; color: white; text-decoration: none; border-radius: 5px;">LinkedIn</a>
-              </div>
-              <p>Or copy this link: <input type="text" value="${eventUrl}" style="width: 300px; padding: 5px;" readonly /></p>
-              <button onclick="window.close()" style="padding: 8px 16px; margin-top: 10px; background: var(--earth-600); color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-            </body>
-          </html>
-        `);
-      }
-      
-      toast.success('Event shared! 🎉');
-    } catch (error) {
-      toast.error('Failed to share event');
-    }
-  };
+  // 🔥 REMOVE OLD shareEvent function - we're using dropdown now
 
   const deleteEvent = async (eventId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -236,24 +192,126 @@ export default function Events() {
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{event.title}</h3>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={(e) => shareEvent(event, e)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        fontSize: '1.2rem',
-                        cursor: 'pointer',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary-100)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                      title="Share event"
-                    >
-                      🔗
-                    </button>
+                  <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
+                    {/* 🔥 NEW: Share Button with Dropdown */}
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setActiveShareId(activeShareId === event._id ? null : event._id);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '1.2rem',
+                          cursor: 'pointer',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary-100)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                        title="Share event"
+                      >
+                        📤
+                      </button>
+                      
+                      {activeShareId === event._id && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          background: 'white',
+                          borderRadius: '8px',
+                          boxShadow: 'var(--shadow-lg)',
+                          padding: '0.5rem',
+                          zIndex: 10,
+                          minWidth: '150px'
+                        }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <a
+                              href={`https://wa.me/?text=${encodeURIComponent(event.title)}%20${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '0.5rem',
+                                textDecoration: 'none',
+                                color: '#25D366',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                borderRadius: '4px'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <span>📱</span> WhatsApp
+                            </a>
+                            <a
+                              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '0.5rem',
+                                textDecoration: 'none',
+                                color: '#1DA1F2',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                borderRadius: '4px'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <span>🐦</span> Twitter
+                            </a>
+                            <a
+                              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '0.5rem',
+                                textDecoration: 'none',
+                                color: '#1877F2',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                borderRadius: '4px'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <span>📘</span> Facebook
+                            </a>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(window.location.origin + '/app/events/' + event._id);
+                                toast.success('Link copied!');
+                              }}
+                              style={{
+                                padding: '0.5rem',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--earth-600)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                width: '100%',
+                                textAlign: 'left'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <span>🔗</span> Copy Link
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
                     {user?.role === 'creator' && (
                       <button
                         onClick={(e) => deleteEvent(event._id, e)}

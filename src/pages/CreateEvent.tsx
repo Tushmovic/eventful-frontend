@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useDropzone } from 'react-dropzone';
+import { CloudArrowUpIcon, XMarkIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -18,6 +20,8 @@ export default function CreateEvent() {
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [showUrlInput, setShowUrlInput] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -43,6 +47,43 @@ export default function CreateEvent() {
     status: 'published'
   });
 
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setShowUrlInput(false);
+      setImageUrl('');
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+    },
+    maxFiles: 1,
+    maxSize: 5 * 1024 * 1024 // 5MB
+  });
+
+  const handleUrlSubmit = async () => {
+    if (imageUrl) {
+      setImagePreview(imageUrl);
+      setImageFile(null);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+    setImageUrl('');
+    setShowUrlInput(false);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
@@ -60,18 +101,6 @@ export default function CreateEvent() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -82,7 +111,7 @@ export default function CreateEvent() {
         `${API_URL}/events`,
         {
           ...formData,
-          ticketPrice: formData.ticketPrice // User enters 5000, backend stores as 500000
+          ticketPrice: formData.ticketPrice
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -104,6 +133,14 @@ export default function CreateEvent() {
             } 
           }
         );
+      } else if (imagePreview && imageUrl) {
+        // If using URL, we need to download and upload or save URL directly
+        // For now, we'll assume the backend handles URL images
+        await axios.post(
+          `${API_URL}/events/${eventId}/images`,
+          { imageUrl },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       }
       
       toast.success('Event created successfully! 🎉');
@@ -116,36 +153,63 @@ export default function CreateEvent() {
   };
 
   return (
-    <div className="container">
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div className="text-center" style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--secondary-900)', marginBottom: '0.5rem' }}>
-            🎪 Create New Event
-          </h1>
-          <p style={{ color: 'var(--secondary-600)' }}>
-            Fill in the details below to create your event
-          </p>
-        </div>
+    <div className="container" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: '700', color: 'var(--earth-800)', marginBottom: '0.5rem' }}>
+          🎪 Create New Event
+        </h1>
+        <p style={{ fontSize: '1.125rem', color: 'var(--earth-600)' }}>
+          Fill in the details below to create your event
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="event-form">
-          {/* Image Upload Section */}
-          <div style={{ 
-            background: 'var(--white)', 
-            padding: '2rem', 
-            borderRadius: 'var(--border-radius)', 
-            boxShadow: 'var(--shadow-md)' 
-          }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--primary-700)' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        {/* Image Upload Section - Professional Drag & Drop */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '2rem',
+          boxShadow: 'var(--shadow-md)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--earth-800)' }}>
               📸 Event Image
             </h3>
-            
-            <div style={{
-              border: '2px dashed var(--earth-300)',
-              borderRadius: '12px',
-              padding: '2rem',
-              textAlign: 'center',
-              background: imagePreview ? 'none' : 'var(--earth-50)'
-            }}>
+            <button
+              type="button"
+              onClick={() => setShowUrlInput(!showUrlInput)}
+              style={{
+                padding: '0.5rem 1rem',
+                background: 'var(--earth-100)',
+                border: '1px solid var(--earth-300)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <LinkIcon style={{ width: '1rem' }} />
+              {showUrlInput ? 'Use File Upload' : 'Use Image URL'}
+            </button>
+          </div>
+
+          {!showUrlInput ? (
+            <div
+              {...getRootProps()}
+              style={{
+                border: `2px dashed ${isDragActive ? 'var(--earth-600)' : 'var(--earth-300)'}`,
+                borderRadius: '12px',
+                padding: '3rem',
+                textAlign: 'center',
+                background: isDragActive ? 'var(--earth-50)' : imagePreview ? 'none' : 'var(--earth-50)',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                position: 'relative'
+              }}
+            >
+              <input {...getInputProps()} />
+              
               {imagePreview ? (
                 <div>
                   <img 
@@ -153,330 +217,581 @@ export default function CreateEvent() {
                     alt="Preview" 
                     style={{ 
                       maxWidth: '100%', 
-                      maxHeight: '200px', 
+                      maxHeight: '300px', 
                       borderRadius: '8px',
                       marginBottom: '1rem'
                     }} 
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      setImageFile(null);
-                      setImagePreview('');
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
                     }}
-                    style={{ 
-                      padding: '0.5rem 1rem',
-                      background: 'var(--earth-100)',
+                    style={{
+                      position: 'absolute',
+                      top: '1rem',
+                      right: '1rem',
+                      padding: '0.5rem',
+                      background: 'rgba(255,255,255,0.9)',
                       border: '1px solid var(--earth-300)',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                   >
-                    Remove Image
+                    <XMarkIcon style={{ width: '1.25rem' }} />
                   </button>
                 </div>
               ) : (
-                <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    style={{ display: 'none' }}
-                    id="image-upload"
-                  />
-                  <label htmlFor="image-upload" style={{ cursor: 'pointer' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📸</div>
-                    <p style={{ color: 'var(--earth-600)' }}>Click to upload an event image</p>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--earth-400)' }}>PNG, JPG up to 5MB</p>
-                  </label>
-                </>
+                <div>
+                  <CloudArrowUpIcon style={{ width: '3rem', height: '3rem', color: 'var(--earth-400)', margin: '0 auto 1rem' }} />
+                  <p style={{ fontSize: '1.125rem', color: 'var(--earth-700)', marginBottom: '0.5rem' }}>
+                    {isDragActive ? 'Drop your image here' : 'Drag & drop your image here'}
+                  </p>
+                  <p style={{ color: 'var(--earth-500)' }}>or click to browse</p>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--earth-400)', marginTop: '1rem' }}>
+                    Supports: JPG, PNG, GIF, WebP (Max 5MB)
+                  </p>
+                </div>
               )}
             </div>
-          </div>
+          ) : (
+            <div style={{
+              border: '2px solid var(--earth-300)',
+              borderRadius: '12px',
+              padding: '2rem',
+              background: 'var(--earth-50)'
+            }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Image URL
+              </label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleUrlSubmit}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'var(--earth-600)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Load
+                </button>
+              </div>
+              {imagePreview && imageUrl && (
+                <div style={{ marginTop: '1rem', position: 'relative' }}>
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }} 
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    style={{
+                      position: 'absolute',
+                      top: '0.5rem',
+                      right: '0.5rem',
+                      padding: '0.25rem',
+                      background: 'rgba(255,255,255,0.9)',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '50%',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <XMarkIcon style={{ width: '1rem' }} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
-          {/* Event Information */}
-          <div style={{ 
-            background: 'var(--white)', 
-            padding: '2rem', 
-            borderRadius: 'var(--border-radius)', 
-            boxShadow: 'var(--shadow-md)' 
-          }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--primary-700)' }}>
-              📋 Event Information
-            </h3>
-            
-            <div className="form-group">
-              <label>Event Title</label>
+        {/* Event Information */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '2rem',
+          boxShadow: 'var(--shadow-md)'
+        }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--earth-800)' }}>
+            📋 Event Information
+          </h3>
+
+          <div style={{ display: 'grid', gap: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Event Title
+              </label>
               <input
                 type="text"
                 name="title"
-                className="form-control"
                 value={formData.title}
                 onChange={handleChange}
                 required
                 placeholder="e.g., Ramadan Night Market 2026"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'all 0.2s'
+                }}
               />
             </div>
 
-            <div className="form-group">
-              <label>Description</label>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Description
+              </label>
               <textarea
                 name="description"
-                className="form-textarea"
                 value={formData.description}
                 onChange={handleChange}
                 required
                 placeholder="Tell people about your event..."
-                rows={5}
+                rows={6}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  resize: 'vertical',
+                  lineHeight: '1.6'
+                }}
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Category</label>
-                <select name="category" className="form-select" value={formData.category} onChange={handleChange}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem'
+            }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Category
+                </label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    background: 'white',
+                    cursor: 'pointer'
+                  }}
+                >
                   {CATEGORIES.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
               </div>
 
-              <div className="form-group">
-                <label>Event Date</label>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Event Date
+                </label>
                 <input
                   type="date"
                   name="date"
-                  className="form-control"
                   value={formData.date}
                   onChange={handleChange}
                   required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Start Time</label>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem'
+            }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Start Time
+                </label>
                 <input
                   type="time"
                   name="startTime"
-                  className="form-control"
                   value={formData.startTime}
                   onChange={handleChange}
                   required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
 
-              <div className="form-group">
-                <label>End Time</label>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  End Time
+                </label>
                 <input
                   type="time"
                   name="endTime"
-                  className="form-control"
                   value={formData.endTime}
                   onChange={handleChange}
                   required
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Location Details */}
-          <div style={{ 
-            background: 'var(--white)', 
-            padding: '2rem', 
-            borderRadius: 'var(--border-radius)', 
-            boxShadow: 'var(--shadow-md)' 
-          }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--primary-700)' }}>
-              📍 Location Details
-            </h3>
+        {/* Location Details */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '2rem',
+          boxShadow: 'var(--shadow-md)'
+        }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--earth-800)' }}>
+            📍 Location Details
+          </h3>
 
-            <div className="form-group">
-              <label>Venue Name</label>
+          <div style={{ display: 'grid', gap: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Venue Name
+              </label>
               <input
                 type="text"
                 name="location.venue"
-                className="form-control"
                 value={formData.location.venue}
                 onChange={handleChange}
                 required
                 placeholder="e.g., Lagos Central Mosque"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
-            <div className="form-group">
-              <label>Address</label>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Address
+              </label>
               <input
                 type="text"
                 name="location.address"
-                className="form-control"
                 value={formData.location.address}
                 onChange={handleChange}
                 required
                 placeholder="Street address"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
-            <div className="form-row-3">
-              <div className="form-group">
-                <label>City</label>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '1rem'
+            }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  City
+                </label>
                 <input
                   type="text"
                   name="location.city"
-                  className="form-control"
                   value={formData.location.city}
                   onChange={handleChange}
                   required
                   placeholder="Lagos"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
 
-              <div className="form-group">
-                <label>State</label>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  State
+                </label>
                 <input
                   type="text"
                   name="location.state"
-                  className="form-control"
                   value={formData.location.state}
                   onChange={handleChange}
                   required
                   placeholder="Lagos"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
 
-              <div className="form-group">
-                <label>Country</label>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Country
+                </label>
                 <input
                   type="text"
                   name="location.country"
-                  className="form-control"
                   value={formData.location.country}
                   onChange={handleChange}
                   required
                   placeholder="Nigeria"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Ticket & Pricing */}
-          <div style={{ 
-            background: 'var(--white)', 
-            padding: '2rem', 
-            borderRadius: 'var(--border-radius)', 
-            boxShadow: 'var(--shadow-md)' 
+        {/* Ticket & Pricing */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '2rem',
+          boxShadow: 'var(--shadow-md)'
+        }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--earth-800)' }}>
+            🎫 Ticket & Pricing
+          </h3>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem'
           }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--primary-700)' }}>
-              🎫 Ticket & Pricing
-            </h3>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Ticket Price (₦)
+              </label>
+              <input
+                type="number"
+                name="ticketPrice"
+                value={formData.ticketPrice}
+                onChange={handleChange}
+                required
+                min="0"
+                placeholder="5000"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+              <small style={{ color: 'var(--earth-500)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
+                Enter price in Naira (e.g., 5000 for ₦5,000)
+              </small>
+            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Ticket Price (₦)</label>
-                <input
-                  type="number"
-                  name="ticketPrice"
-                  className="form-control"
-                  value={formData.ticketPrice}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  placeholder="5000"
-                />
-                <small style={{ color: 'var(--earth-500)', fontSize: '0.75rem' }}>
-                  Enter price in Naira (e.g., 5000 for ₦5,000)
-                </small>
-              </div>
-
-              <div className="form-group">
-                <label>Total Tickets</label>
-                <input
-                  type="number"
-                  name="totalTickets"
-                  className="form-control"
-                  value={formData.totalTickets}
-                  onChange={handleChange}
-                  required
-                  min="1"
-                  placeholder="100"
-                />
-              </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Total Tickets
+              </label>
+              <input
+                type="number"
+                name="totalTickets"
+                value={formData.totalTickets}
+                onChange={handleChange}
+                required
+                min="1"
+                placeholder="100"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
             </div>
           </div>
+        </div>
 
-          {/* Organizer Information */}
-          <div style={{ 
-            background: 'var(--white)', 
-            padding: '2rem', 
-            borderRadius: 'var(--border-radius)', 
-            boxShadow: 'var(--shadow-md)' 
-          }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--primary-700)' }}>
-              📞 Organizer Information
-            </h3>
+        {/* Organizer Information */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '2rem',
+          boxShadow: 'var(--shadow-md)'
+        }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', color: 'var(--earth-800)' }}>
+            📞 Organizer Information
+          </h3>
 
-            <div className="form-group">
-              <label>Organizer Name</label>
+          <div style={{ display: 'grid', gap: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Organizer Name
+              </label>
               <input
                 type="text"
                 name="organizer.name"
-                className="form-control"
                 value={formData.organizer.name}
                 onChange={handleChange}
                 required
                 placeholder="Your name or company"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Organizer Email</label>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem'
+            }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Organizer Email
+                </label>
                 <input
                   type="email"
                   name="organizer.email"
-                  className="form-control"
                   value={formData.organizer.email}
                   onChange={handleChange}
                   required
                   placeholder="contact@example.com"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
 
-              <div className="form-group">
-                <label>Organizer Phone</label>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Organizer Phone
+                </label>
                 <input
                   type="tel"
                   name="organizer.phone"
-                  className="form-control"
                   value={formData.organizer.phone}
                   onChange={handleChange}
                   required
                   placeholder="08012345678"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid var(--earth-300)',
+                    borderRadius: '8px',
+                    fontSize: '1rem'
+                  }}
                 />
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-4" style={{ justifyContent: 'flex-end' }}>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => navigate('/app/events')}
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? 'Creating...' : 'Create Event 🎉'}
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* Form Actions */}
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+          <button
+            type="button"
+            onClick={() => navigate('/app/events')}
+            disabled={loading}
+            style={{
+              padding: '0.75rem 2rem',
+              background: 'white',
+              border: '1px solid var(--earth-300)',
+              borderRadius: '8px',
+              color: 'var(--earth-700)',
+              fontSize: '1rem',
+              fontWeight: '500',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: '0.75rem 2rem',
+              background: 'var(--earth-600)',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1
+            }}
+          >
+            {loading ? 'Creating...' : 'Create Event 🎉'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
