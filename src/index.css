@@ -120,6 +120,7 @@ body {
   background: linear-gradient(135deg, var(--earth-700), var(--earth-900));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text; /* 🔥 FIX: Added standard property */
 }
 
 .navbar-menu {
@@ -534,6 +535,17 @@ body {
 .justify-between { justify-content: space-between; }
 .w-full { width: 100%; }
 
+/* ===== STEP CONNECTOR FOR LANDING PAGE ===== */
+.step-connector {
+  position: absolute;
+  top: 2rem;
+  right: -50%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--earth-300), transparent);
+  display: none;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .navbar-container {
@@ -561,5 +573,11 @@ body {
   
   .auth-card {
     padding: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .step-connector {
+    display: block;
   }
 }
