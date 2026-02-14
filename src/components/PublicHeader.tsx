@@ -9,6 +9,7 @@ import {
   SunIcon,
   MoonIcon
 } from '@heroicons/react/24/outline';
+import LanguageSwitcher from './LanguageSwitcher';
 // import { useTheme } from '../context/ThemeContext'; // Comment out until ThemeContext is created
 
 export default function PublicHeader() {
@@ -81,7 +82,7 @@ export default function PublicHeader() {
           </Link>
         </div>
 
-        {/* Desktop Navigation - Using media query in a style tag approach */}
+        {/* Desktop Navigation */}
         <div style={{
           display: 'none',
           gap: '2rem',
@@ -105,6 +106,8 @@ export default function PublicHeader() {
 
         {/* Right Side Actions */}
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <LanguageSwitcher /> {/* 🔥 ADDED */}
+          
           <button
             onClick={toggleTheme}
             style={{
