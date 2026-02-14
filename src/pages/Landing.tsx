@@ -178,76 +178,7 @@ export default function Landing() {
         boxShadow: scrolled ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
       }}>
         {/* Top Bar */}
-        <div style={{
-          background: scrolled ? 'var(--earth-800)' : 'var(--earth-800)',
-          color: 'white',
-          padding: '0.75rem 1rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button
-              onClick={toggleMobileMenu}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'white',
-                cursor: 'pointer',
-                padding: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              {mobileMenuOpen ? (
-                <XMarkIcon style={{ width: '1.5rem', height: '1.5rem' }} />
-              ) : (
-                <Bars3Icon style={{ width: '1.5rem', height: '1.5rem' }} />
-              )}
-            </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.5rem' }}>🎭</span>
-              <span style={{ fontWeight: 'bold', fontSize: '1.125rem', color: 'white' }}>Alaya Eventful</span>
-            </div>
-          </div>
-          
-          {/* Sticky Auth Buttons - Only on Landing Page */}
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Link 
-              to="/login" 
-              style={{
-                padding: '0.4rem 1rem',
-                background: scrolled ? 'var(--earth-600)' : 'transparent',
-                border: '1px solid var(--earth-300)',
-                color: 'white',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                transition: 'all 0.2s'
-              }}
-            >
-              Login
-            </Link>
-            <Link 
-              to="/register" 
-              style={{
-                padding: '0.4rem 1rem',
-                background: 'var(--earth-500)',
-                color: 'white',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                transition: 'all 0.2s'
-              }}
-            >
-              Sign Up
-            </Link>
-          </div>
-        </div>
+
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
