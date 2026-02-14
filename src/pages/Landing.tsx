@@ -8,7 +8,6 @@ import {
   CreditCardIcon,
   BellIcon,
   ShareIcon,
-  ChevronRightIcon,
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon
@@ -22,8 +21,15 @@ import {
   FaGithub 
 } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 export default function Landing() {
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
   const [currentPartner, setCurrentPartner] = useState(0);
   
   const partners = [
@@ -45,49 +51,49 @@ export default function Landing() {
 
   const tools = [
     {
-      icon: <CalendarIcon className="w-8 h-8" />,
+      icon: '🎪',
       title: 'Event Management',
       description: 'Create, manage, and publish events with ease. Set ticket prices, capacity, and event details.',
       color: 'from-emerald-500 to-teal-500'
     },
     {
-      icon: <TicketIcon className="w-8 h-8" />,
+      icon: '🎟️',
       title: 'Ticket Sales',
       description: 'Sell tickets securely with Paystack integration. Track sales in real-time.',
       color: 'from-blue-500 to-indigo-500'
     },
     {
-      icon: <QrCodeIcon className="w-8 h-8" />,
+      icon: '📱',
       title: 'QR Code Check-in',
       description: 'Generate unique QR codes for every ticket. Scan and verify at the door instantly.',
       color: 'from-purple-500 to-pink-500'
     },
     {
-      icon: <ChartBarIcon className="w-8 h-8" />,
+      icon: '📊',
       title: 'Analytics Dashboard',
       description: 'Track attendance, revenue, and event performance with beautiful charts.',
       color: 'from-orange-500 to-red-500'
     },
     {
-      icon: <UserGroupIcon className="w-8 h-8" />,
+      icon: '👥',
       title: 'Attendee Management',
       description: 'View and manage all attendees. Send notifications and updates.',
       color: 'from-cyan-500 to-blue-500'
     },
     {
-      icon: <CreditCardIcon className="w-8 h-8" />,
+      icon: '💳',
       title: 'Secure Payments',
       description: 'Process payments securely with Paystack. Multiple payment methods supported.',
       color: 'from-green-500 to-emerald-500'
     },
     {
-      icon: <BellIcon className="w-8 h-8" />,
+      icon: '🔔',
       title: 'Automated Reminders',
       description: 'Send automatic reminders to attendees before events start.',
       color: 'from-yellow-500 to-orange-500'
     },
     {
-      icon: <ShareIcon className="w-8 h-8" />,
+      icon: '📤',
       title: 'Social Sharing',
       description: 'Share events on social media with one click. Increase your reach.',
       color: 'from-pink-500 to-rose-500'
@@ -126,6 +132,22 @@ export default function Landing() {
     company: ['About Us', 'Careers', 'Press', 'Contact'],
     legal: ['Terms of Service', 'Privacy Policy', 'Cookie Policy', 'Security'],
     support: ['Help Center', 'Documentation', 'API Status', 'Community']
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubscribing(true);
+    
+    try {
+      const response = await axios.post(`${API_URL}/newsletter/subscribe`, { email });
+      setSubscribed(true);
+      setEmail('');
+      toast.success(response.data.message);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Subscription failed');
+    } finally {
+      setSubscribing(false);
+    }
   };
 
   return (
@@ -235,7 +257,7 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Features Section */}
+      {/* Features Section - 4 Columns */}
       <div id="features" style={{ padding: '5rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
           <h2 style={{ 
@@ -258,8 +280,9 @@ export default function Landing() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '2rem'
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '1.5rem',
+          marginTop: '2rem'
         }}>
           {tools.map((tool, index) => (
             <div
@@ -267,11 +290,12 @@ export default function Landing() {
               style={{
                 background: 'white',
                 borderRadius: '16px',
-                padding: '2rem',
+                padding: '1.5rem',
                 boxShadow: 'var(--shadow-lg)',
                 transition: 'all 0.3s',
                 border: '1px solid var(--earth-200)',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                textAlign: 'center'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px)';
@@ -283,22 +307,15 @@ export default function Landing() {
               }}
             >
               <div style={{
-                width: '4rem',
-                height: '4rem',
-                borderRadius: '12px',
-                background: `linear-gradient(135deg, ${tool.color.split(' ')[0]}, ${tool.color.split(' ')[2]})`,
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '1.5rem'
+                fontSize: '3rem',
+                marginBottom: '1rem'
               }}>
                 {tool.icon}
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: 'var(--earth-800)' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem', color: 'var(--earth-800)' }}>
                 {tool.title}
               </h3>
-              <p style={{ color: 'var(--earth-600)', lineHeight: '1.6' }}>
+              <p style={{ color: 'var(--earth-600)', lineHeight: '1.6', fontSize: '0.9rem' }}>
                 {tool.description}
               </p>
             </div>
@@ -358,7 +375,6 @@ export default function Landing() {
                 }}>
                   {step.icon}
                 </div>
-                {/* 🔥 FIX: Removed the media query from inline style */}
                 {index < howItWorks.length - 1 && (
                   <div className="step-connector" />
                 )}
@@ -398,7 +414,7 @@ export default function Landing() {
             fontWeight: 'bold',
             transition: 'all 0.3s'
           }}>Create Your Account</Link>
-          <Link to="/events" style={{
+          <Link to="/app/events" style={{
             padding: '1rem 2.5rem',
             background: 'transparent',
             border: '2px solid var(--earth-400)',
@@ -412,7 +428,7 @@ export default function Landing() {
       </div>
 
       {/* Partners Sliding Section */}
-      <div id="partners" style={{ padding: '4rem 2rem', background: 'white' }}>
+      <div id="partners" style={{ padding: '4rem 2rem', background: 'white', overflow: 'hidden' }}>
         <h2 style={{ 
           textAlign: 'center', 
           fontSize: '2rem', 
@@ -424,43 +440,56 @@ export default function Landing() {
         </h2>
         
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '3rem',
-          flexWrap: 'wrap',
-          maxWidth: '1000px',
-          margin: '0 auto'
+          position: 'relative',
+          width: '100%',
+          overflow: 'hidden',
+          padding: '2rem 0'
         }}>
-          {partners.map((partner, index) => (
-            <div
-              key={index}
-              style={{
-                padding: '1rem',
-                filter: 'grayscale(100%)',
-                opacity: '0.7',
-                transition: 'all 0.3s',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.filter = 'grayscale(0)';
-                e.currentTarget.style.opacity = '1';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.filter = 'grayscale(100%)';
-                e.currentTarget.style.opacity = '0.7';
-              }}
-            >
-              <img 
-                src={partner.logo} 
-                alt={partner.name}
-                style={{ height: '40px', width: 'auto' }}
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
+          <div style={{
+            display: 'flex',
+            gap: '4rem',
+            animation: 'slide 20s linear infinite',
+            width: 'fit-content'
+          }}>
+            {[...partners, ...partners].map((partner, index) => (
+              <div
+                key={index}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'white',
+                  borderRadius: '12px',
+                  boxShadow: 'var(--shadow-md)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '150px'
                 }}
-              />
-            </div>
-          ))}
+              >
+                <img 
+                  src={partner.logo} 
+                  alt={partner.name}
+                  style={{ 
+                    height: '40px', 
+                    width: 'auto',
+                    filter: 'grayscale(100%)',
+                    opacity: '0.7',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.filter = 'grayscale(0)';
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.filter = 'grayscale(100%)';
+                    e.currentTarget.style.opacity = '0.7';
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -485,10 +514,13 @@ export default function Landing() {
             <p style={{ color: 'var(--earth-300)', marginBottom: '2rem' }}>
               Get the latest updates on events and features
             </p>
-            <form style={{ display: 'flex', gap: '1rem', maxWidth: '500px', margin: '0 auto' }}>
+            <form onSubmit={handleSubscribe} style={{ display: 'flex', gap: '1rem', maxWidth: '500px', margin: '0 auto' }}>
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
+                required
                 style={{
                   flex: 1,
                   padding: '1rem',
@@ -498,16 +530,21 @@ export default function Landing() {
                   color: 'white'
                 }}
               />
-              <button style={{
-                padding: '1rem 2rem',
-                background: 'var(--earth-500)',
-                border: 'none',
-                borderRadius: '8px',
-                color: 'white',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}>
-                Subscribe
+              <button 
+                type="submit"
+                disabled={subscribing}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'var(--earth-500)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  fontWeight: '600',
+                  cursor: subscribing ? 'not-allowed' : 'pointer',
+                  opacity: subscribing ? 0.7 : 1
+                }}
+              >
+                {subscribing ? 'Subscribing...' : 'Subscribe'}
               </button>
             </form>
           </div>
