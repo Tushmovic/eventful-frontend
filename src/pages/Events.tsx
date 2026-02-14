@@ -158,12 +158,12 @@ export default function Events() {
 
   return (
     <div className="container">
-      <div className="flex justify-between items-center" style={{ marginBottom: '2rem' }}>
+      <div className="flex justify-between items-center" style={{ marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--secondary-900)' }}>
           🎪 Upcoming Events
         </h1>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
           {categories.map(category => (
             <button
               key={category}

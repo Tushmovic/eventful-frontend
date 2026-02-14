@@ -194,10 +194,9 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <div style={{
+      <div className="hero-section" style={{
         background: 'linear-gradient(135deg, var(--earth-700), var(--earth-900))',
         color: 'white',
-        padding: '6rem 2rem',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden'
@@ -213,12 +212,7 @@ export default function Landing() {
           pointerEvents: 'none'
         }} />
         
-        <h1 style={{ 
-          fontSize: '3.5rem', 
-          marginBottom: '1.5rem',
-          fontWeight: '800',
-          lineHeight: '1.2'
-        }}>
+        <h1 className="hero-title">
           Your Gateway to <span style={{ color: 'var(--earth-300)' }}>Islamic Events</span> 🕌
         </h1>
         <p style={{ 
@@ -231,33 +225,31 @@ export default function Landing() {
           Discover, book, and experience the best Islamic events, lectures, and gatherings in your community. 
           From Ramadan markets to educational seminars, we bring the Ummah together.
         </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <Link to="/register" style={{
-            display: 'inline-block',
-            padding: '1rem 2rem',
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/register" className="btn" style={{
             background: 'var(--earth-500)',
             color: 'white',
             textDecoration: 'none',
             borderRadius: '50px',
             fontSize: '1.125rem',
             fontWeight: 'bold',
-            transition: 'all 0.3s'
+            transition: 'all 0.3s',
+            padding: '1rem 2rem'
           }}>Get Started →</Link>
-          <a href="#features" style={{
-            display: 'inline-block',
-            padding: '1rem 2rem',
+          <a href="#features" className="btn" style={{
             background: 'transparent',
             border: '2px solid var(--earth-400)',
             color: 'white',
             textDecoration: 'none',
             borderRadius: '50px',
             fontSize: '1.125rem',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            padding: '1rem 2rem'
           }}>Learn More</a>
         </div>
       </div>
 
-      {/* Features Section - 4 Columns */}
+      {/* Features Section */}
       <div id="features" style={{ padding: '5rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
           <h2 style={{ 
@@ -278,34 +270,9 @@ export default function Landing() {
           </p>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '1.5rem',
-          marginTop: '2rem'
-        }}>
+        <div className="features-grid">
           {tools.map((tool, index) => (
-            <div
-              key={index}
-              style={{
-                background: 'white',
-                borderRadius: '16px',
-                padding: '1.5rem',
-                boxShadow: 'var(--shadow-lg)',
-                transition: 'all 0.3s',
-                border: '1px solid var(--earth-200)',
-                cursor: 'pointer',
-                textAlign: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-              }}
-            >
+            <div key={index} className="feature-card">
               <div style={{
                 fontSize: '3rem',
                 marginBottom: '1rem'
@@ -348,12 +315,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '2rem',
-            position: 'relative'
-          }}>
+          <div className="how-it-works-grid">
             {howItWorks.map((step, index) => (
               <div key={index} style={{
                 textAlign: 'center',
@@ -403,8 +365,8 @@ export default function Landing() {
         <p style={{ fontSize: '1.125rem', color: 'var(--earth-300)', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
           Join thousands of event organizers and attendees who trust Eventful for their Islamic events.
         </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <Link to="/register" style={{
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/register" className="btn" style={{
             padding: '1rem 2.5rem',
             background: 'var(--earth-500)',
             color: 'white',
@@ -414,7 +376,7 @@ export default function Landing() {
             fontWeight: 'bold',
             transition: 'all 0.3s'
           }}>Create Your Account</Link>
-          <Link to="/app/events" style={{
+          <Link to="/app/events" className="btn" style={{
             padding: '1rem 2.5rem',
             background: 'transparent',
             border: '2px solid var(--earth-400)',
@@ -514,7 +476,7 @@ export default function Landing() {
             <p style={{ color: 'var(--earth-300)', marginBottom: '2rem' }}>
               Get the latest updates on events and features
             </p>
-            <form onSubmit={handleSubscribe} style={{ display: 'flex', gap: '1rem', maxWidth: '500px', margin: '0 auto' }}>
+            <form onSubmit={handleSubscribe} style={{ display: 'flex', gap: '1rem', maxWidth: '500px', margin: '0 auto', flexDirection: 'column' }}>
               <input
                 type="email"
                 value={email}

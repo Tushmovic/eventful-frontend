@@ -231,7 +231,7 @@ export default function CreateEvent() {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-row">
               <div className="form-group">
                 <label>Category</label>
                 <select name="category" className="form-select" value={formData.category} onChange={handleChange}>
@@ -254,7 +254,7 @@ export default function CreateEvent() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-row">
               <div className="form-group">
                 <label>Start Time</label>
                 <input
@@ -318,7 +318,7 @@ export default function CreateEvent() {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+            <div className="form-row-3">
               <div className="form-group">
                 <label>City</label>
                 <input
@@ -371,7 +371,7 @@ export default function CreateEvent() {
               🎫 Ticket & Pricing
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-row">
               <div className="form-group">
                 <label>Ticket Price (₦)</label>
                 <input
@@ -429,7 +429,7 @@ export default function CreateEvent() {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-row">
               <div className="form-group">
                 <label>Organizer Email</label>
                 <input
@@ -458,7 +458,7 @@ export default function CreateEvent() {
             </div>
           </div>
 
-          <div className="flex gap-4" style={{ justifyContent: 'flex-end' }}>
+          <div className="flex flex-col gap-4" style={{ justifyContent: 'flex-end' }}>
             <button
               type="button"
               className="btn btn-secondary"
