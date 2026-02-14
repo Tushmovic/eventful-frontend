@@ -5,41 +5,20 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   en: {
     translation: {
-      // Navigation
       home: "Home",
       browseEvents: "Browse Events",
       contactUs: "Contact Us",
       login: "Login",
       signUp: "Sign Up",
       logout: "Logout",
-      
-      // Common
-      loading: "Loading...",
-      save: "Save",
-      cancel: "Cancel",
-      delete: "Delete",
-      edit: "Edit",
-      
-      // Events
-      upcomingEvents: "Upcoming Events",
-      noEventsFound: "No events found",
-      ticketsLeft: "tickets left",
-      buyTicket: "Buy Ticket",
-      soldOut: "Sold Out",
-      share: "Share",
-      
-      // Profile
       profile: "Profile",
       myTickets: "My Tickets",
       dashboard: "Dashboard",
       createEvent: "Create Event",
       analytics: "Analytics",
-      
-      // Forms
       name: "Name",
       email: "Email",
       password: "Password",
-      confirmPassword: "Confirm Password",
       description: "Description",
       category: "Category",
       date: "Date",
@@ -52,59 +31,118 @@ const resources = {
       country: "Country",
       phone: "Phone",
       website: "Website",
-      
-      // Messages
-      welcomeBack: "Welcome back!",
-      registrationSuccessful: "Registration successful! Please login.",
-      paymentSuccessful: "Payment successful!",
-      eventCreated: "Event created successfully!",
-      eventDeleted: "Event deleted successfully",
-      
-      // Footer
-      product: "Product",
-      company: "Company",
-      legal: "Legal",
-      support: "Support",
       builtBy: "Built with ❤️ by Alaya Ibrahim @ AltSchool Africa"
+    }
+  },
+  ar: {
+    translation: {
+      home: "الرئيسية",
+      browseEvents: "تصفح الفعاليات",
+      contactUs: "اتصل بنا",
+      login: "تسجيل الدخول",
+      signUp: "اشتراك",
+      logout: "تسجيل الخروج",
+      profile: "الملف الشخصي",
+      myTickets: "تذاكري",
+      dashboard: "لوحة التحكم",
+      createEvent: "إنشاء فعالية",
+      analytics: "تحليلات",
+      name: "الاسم",
+      email: "البريد الإلكتروني",
+      password: "كلمة المرور",
+      description: "الوصف",
+      category: "الفئة",
+      date: "التاريخ",
+      time: "الوقت",
+      location: "الموقع",
+      venue: "المكان",
+      address: "العنوان",
+      city: "المدينة",
+      state: "الولاية",
+      country: "البلد",
+      phone: "الهاتف",
+      website: "الموقع الإلكتروني",
+      builtBy: "تم بناؤه بـ ❤️ بواسطة Alaya Ibrahim @ AltSchool Africa"
+    }
+  },
+  fr: {
+    translation: {
+      home: "Accueil",
+      browseEvents: "Parcourir les événements",
+      contactUs: "Contactez-nous",
+      login: "Connexion",
+      signUp: "S'inscrire",
+      logout: "Déconnexion",
+      profile: "Profil",
+      myTickets: "Mes billets",
+      dashboard: "Tableau de bord",
+      createEvent: "Créer un événement",
+      analytics: "Analyses",
+      name: "Nom",
+      email: "E-mail",
+      password: "Mot de passe",
+      description: "Description",
+      category: "Catégorie",
+      date: "Date",
+      time: "Heure",
+      location: "Lieu",
+      venue: "Salle",
+      address: "Adresse",
+      city: "Ville",
+      state: "État",
+      country: "Pays",
+      phone: "Téléphone",
+      website: "Site web",
+      builtBy: "Construit avec ❤️ par Alaya Ibrahim @ AltSchool Africa"
+    }
+  },
+  zh: {
+    translation: {
+      home: "首页",
+      browseEvents: "浏览活动",
+      contactUs: "联系我们",
+      login: "登录",
+      signUp: "注册",
+      logout: "退出",
+      profile: "个人资料",
+      myTickets: "我的门票",
+      dashboard: "仪表板",
+      createEvent: "创建活动",
+      analytics: "分析",
+      name: "姓名",
+      email: "电子邮件",
+      password: "密码",
+      description: "描述",
+      category: "类别",
+      date: "日期",
+      time: "时间",
+      location: "地点",
+      venue: "场地",
+      address: "地址",
+      city: "城市",
+      state: "州",
+      country: "国家",
+      phone: "电话",
+      website: "网站",
+      builtBy: "由 Alaya Ibrahim @ AltSchool Africa 用 ❤️ 构建"
     }
   },
   ha: {
     translation: {
-      // Navigation
       home: "Gida",
       browseEvents: "Bincika Abubuwan",
       contactUs: "Tuntube Mu",
       login: "Shiga",
       signUp: "Rajista",
       logout: "Fita",
-      
-      // Common
-      loading: "Ana lodin...",
-      save: "Ajiye",
-      cancel: "Soke",
-      delete: "Share",
-      edit: "Gyara",
-      
-      // Events
-      upcomingEvents: "Abubuwan Masu Zuwa",
-      noEventsFound: "Ba a sami abubuwan ba",
-      ticketsLeft: "tikiti suka rage",
-      buyTicket: "Sayi Tikiti",
-      soldOut: "An Sayar Duka",
-      share: "Raba",
-      
-      // Profile
       profile: "Bayanan Kai",
       myTickets: "Tikitina",
       dashboard: "Dashboard",
       createEvent: "Ƙirƙiri Taron",
       analytics: "Bincike",
-      
-      // Forms
       name: "Suna",
       email: "Imel",
       password: "Kalmar Sirri",
-      confirmPassword: "Tabbatar Kalmar Sirri",
       description: "Bayani",
       category: "Rukuni",
       date: "Kwanan",
@@ -117,59 +155,25 @@ const resources = {
       country: "Ƙasa",
       phone: "Waya",
       website: "Gidan Yanar",
-      
-      // Messages
-      welcomeBack: "Barka da dawowa!",
-      registrationSuccessful: "An yi rajista cikin nasara! Da fatan za a shiga.",
-      paymentSuccessful: "Biyan kuɗi ya yi nasara!",
-      eventCreated: "An ƙirƙiri taron cikin nasara!",
-      eventDeleted: "An share taron cikin nasara",
-      
-      // Footer
-      product: "Samfur",
-      company: "Kamfani",
-      legal: "Doka",
-      support: "Taimako",
       builtBy: "An gina shi da ❤️ ta Alaya Ibrahim @ AltSchool Africa"
     }
   },
   yo: {
     translation: {
-      // Navigation
       home: "Ile",
       browseEvents: "Ṣawari Awọn Iṣẹlẹ",
       contactUs: "Kan si Wa",
       login: "Wọle",
       signUp: "Forukọsilẹ",
       logout: "Jade",
-      
-      // Common
-      loading: "Ń gbéwọlé...",
-      save: "Fipamọ",
-      cancel: "Fagilee",
-      delete: "Paarẹ",
-      edit: "Ṣatunkọ",
-      
-      // Events
-      upcomingEvents: "Awọn Iṣẹlẹ ti n Bọ",
-      noEventsFound: "Ko ri awọn iṣẹlẹ",
-      ticketsLeft: "tiketi ti o ku",
-      buyTicket: "Ra Tiketi",
-      soldOut: "Ti Ta Tan",
-      share: "Pin",
-      
-      // Profile
       profile: "Profaili",
       myTickets: "Awọn Tiketi Mi",
       dashboard: "Dashibọọdu",
       createEvent: "Ṣẹda Iṣẹlẹ",
       analytics: "Itupalẹ",
-      
-      // Forms
       name: "Orukọ",
       email: "Imeeli",
       password: "Ọrọigbaniwọle",
-      confirmPassword: "Jẹrisi Ọrọigbaniwọle",
       description: "Apejuwe",
       category: "Ẹka",
       date: "Ọjọ",
@@ -182,19 +186,6 @@ const resources = {
       country: "Orilẹ-ede",
       phone: "Foonu",
       website: "Oju opo wẹẹbu",
-      
-      // Messages
-      welcomeBack: "Kaabo!",
-      registrationSuccessful: "Iforukọsilẹ ṣaṣeyọri! Jọwọ wọle.",
-      paymentSuccessful: "Isanwo ṣaṣeyọri!",
-      eventCreated: "Ṣẹda iṣẹlẹ ni ifijiṣẹ!",
-      eventDeleted: "Paarẹ iṣẹlẹ ni ifijiṣẹ",
-      
-      // Footer
-      product: "Ọja",
-      company: "Ile-iṣẹ",
-      legal: "Ofin",
-      support: "Atilẹyin",
       builtBy: "Ti a ṣe pẹlu ❤️ nipasẹ Alaya Ibrahim @ AltSchool Africa"
     }
   }
