@@ -4,6 +4,16 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { 
+  FaWhatsapp, 
+  FaFacebookF, 
+  FaTwitter, 
+  FaLinkedinIn,
+  FaTiktok,
+  FaEnvelope,
+  FaLink,
+  FaShareAlt
+} from 'react-icons/fa';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -28,7 +38,7 @@ export default function Events() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activeShareId, setActiveShareId] = useState<string | null>(null); // 🔥 NEW
+  const [activeShareId, setActiveShareId] = useState<string | null>(null);
   const { token, user } = useAuth();
 
   useEffect(() => {
@@ -68,8 +78,6 @@ export default function Events() {
       toast.error(error.response?.data?.message || 'Purchase failed');
     }
   };
-
-  // 🔥 REMOVE OLD shareEvent function - we're using dropdown now
 
   const deleteEvent = async (eventId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -193,7 +201,7 @@ export default function Events() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{event.title}</h3>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
-                    {/* 🔥 NEW: Share Button with Dropdown */}
+                    {/* 🔥 NEW: Share Button with Beautiful Dropdown */}
                     <div style={{ position: 'relative' }}>
                       <button
                         onClick={(e) => {
@@ -206,15 +214,25 @@ export default function Events() {
                           border: 'none',
                           fontSize: '1.2rem',
                           cursor: 'pointer',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          transition: 'all 0.2s'
+                          padding: '8px',
+                          borderRadius: '50%',
+                          transition: 'all 0.2s',
+                          color: 'var(--earth-600)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary-100)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'var(--earth-100)';
+                          e.currentTarget.style.color = 'var(--earth-800)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'none';
+                          e.currentTarget.style.color = 'var(--earth-600)';
+                        }}
                         title="Share event"
                       >
-                        📤
+                        <FaShareAlt size={18} />
                       </button>
                       
                       {activeShareId === event._id && (
@@ -223,89 +241,169 @@ export default function Events() {
                           top: '100%',
                           right: 0,
                           background: 'white',
-                          borderRadius: '8px',
-                          boxShadow: 'var(--shadow-lg)',
-                          padding: '0.5rem',
+                          borderRadius: '12px',
+                          boxShadow: 'var(--shadow-xl)',
+                          padding: '0.75rem',
                           zIndex: 10,
-                          minWidth: '150px'
+                          minWidth: '220px',
+                          border: '1px solid var(--earth-200)'
                         }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: '0.5rem',
+                            marginBottom: '0.5rem'
+                          }}>
                             <a
                               href={`https://wa.me/?text=${encodeURIComponent(event.title)}%20${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
-                                padding: '0.5rem',
-                                textDecoration: 'none',
-                                color: '#25D366',
+                                padding: '0.75rem',
+                                background: '#25D366',
+                                color: 'white',
+                                borderRadius: '8px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.5rem',
-                                borderRadius: '4px'
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              title="Share on WhatsApp"
                             >
-                              <span>📱</span> WhatsApp
-                            </a>
-                            <a
-                              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                padding: '0.5rem',
-                                textDecoration: 'none',
-                                color: '#1DA1F2',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                borderRadius: '4px'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <span>🐦</span> Twitter
+                              <FaWhatsapp size={20} />
                             </a>
                             <a
                               href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
-                                padding: '0.5rem',
-                                textDecoration: 'none',
-                                color: '#1877F2',
+                                padding: '0.75rem',
+                                background: '#1877F2',
+                                color: 'white',
+                                borderRadius: '8px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.5rem',
-                                borderRadius: '4px'
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              title="Share on Facebook"
                             >
-                              <span>📘</span> Facebook
+                              <FaFacebookF size={20} />
+                            </a>
+                            <a
+                              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '0.75rem',
+                                background: '#1DA1F2',
+                                color: 'white',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              title="Share on Twitter"
+                            >
+                              <FaTwitter size={20} />
+                            </a>
+                            <a
+                              href={`https://www.tiktok.com/share?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '0.75rem',
+                                background: '#000000',
+                                color: 'white',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              title="Share on TikTok"
+                            >
+                              <FaTiktok size={20} />
+                            </a>
+                          </div>
+
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            gap: '0.5rem'
+                          }}>
+                            <a
+                              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '0.75rem',
+                                background: '#0A66C2',
+                                color: 'white',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              title="Share on LinkedIn"
+                            >
+                              <FaLinkedinIn size={18} />
+                            </a>
+                            <a
+                              href={`mailto:?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent('Check out this event: ' + window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '0.75rem',
+                                background: '#EA4335',
+                                color: 'white',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              title="Share via Email"
+                            >
+                              <FaEnvelope size={18} />
                             </a>
                             <button
                               onClick={() => {
                                 navigator.clipboard.writeText(window.location.origin + '/app/events/' + event._id);
                                 toast.success('Link copied!');
+                                setActiveShareId(null);
                               }}
                               style={{
-                                padding: '0.5rem',
-                                background: 'none',
+                                padding: '0.75rem',
+                                background: 'var(--earth-600)',
+                                color: 'white',
+                                borderRadius: '8px',
                                 border: 'none',
-                                color: 'var(--earth-600)',
+                                cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.5rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                width: '100%',
-                                textAlign: 'left'
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--earth-700)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--earth-600)'}
+                              title="Copy link"
                             >
-                              <span>🔗</span> Copy Link
+                              <FaLink size={18} />
                             </button>
                           </div>
                         </div>
@@ -321,11 +419,14 @@ export default function Events() {
                           border: 'none',
                           fontSize: '1.2rem',
                           cursor: deletingId === event._id ? 'not-allowed' : 'pointer',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
+                          padding: '8px',
+                          borderRadius: '50%',
                           transition: 'all 0.2s',
                           color: '#ef4444',
-                          opacity: deletingId === event._id ? 0.5 : 1
+                          opacity: deletingId === event._id ? 0.5 : 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
                         onMouseEnter={(e) => {
                           if (deletingId !== event._id) {
