@@ -491,7 +491,7 @@ export default function Landing() {
             fontWeight: 'bold',
             transition: 'all 0.3s'
           }}>Create Your Account</Link>
-          <Link to="/app/events" className="btn" style={{
+          <Link to="/events" className="btn" style={{
             padding: '1rem 2.5rem',
             background: 'transparent',
             border: '2px solid var(--earth-400)',
