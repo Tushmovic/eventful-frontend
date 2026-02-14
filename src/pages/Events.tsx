@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -26,7 +27,8 @@ export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const { token } = useAuth();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { token, user } = useAuth();
 
   useEffect(() => {
     fetchEvents();
@@ -110,6 +112,31 @@ export default function Events() {
       toast.success('Event shared! 🎉');
     } catch (error) {
       toast.error('Failed to share event');
+    }
+  };
+
+  const deleteEvent = async (eventId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      return;
+    }
+    
+    setDeletingId(eventId);
+    
+    try {
+      await axios.delete(
+        `${API_URL}/events/${eventId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setEvents(events.filter(event => event._id !== eventId));
+      toast.success('Event deleted successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to delete event');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -209,23 +236,53 @@ export default function Events() {
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{event.title}</h3>
-                  <button
-                    onClick={(e) => shareEvent(event, e)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '1.2rem',
-                      cursor: 'pointer',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary-100)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                    title="Share event"
-                  >
-                    🔗
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={(e) => shareEvent(event, e)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '1.2rem',
+                        cursor: 'pointer',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary-100)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                      title="Share event"
+                    >
+                      🔗
+                    </button>
+                    {user?.role === 'creator' && (
+                      <button
+                        onClick={(e) => deleteEvent(event._id, e)}
+                        disabled={deletingId === event._id}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '1.2rem',
+                          cursor: deletingId === event._id ? 'not-allowed' : 'pointer',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          transition: 'all 0.2s',
+                          color: '#ef4444',
+                          opacity: deletingId === event._id ? 0.5 : 1
+                        }}
+                        onMouseEnter={(e) => {
+                          if (deletingId !== event._id) {
+                            e.currentTarget.style.background = '#fee2e2';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'none';
+                        }}
+                        title="Delete event"
+                      >
+                        <TrashIcon style={{ width: '1.2rem', height: '1.2rem' }} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
                 <p style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
