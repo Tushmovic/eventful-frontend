@@ -8,6 +8,7 @@ import {
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
   HomeIcon,
+  UserCircleIcon,
   Bars3Icon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -130,16 +131,31 @@ export default function Layout() {
             </div>
           </div>
 
-          {/* User Info */}
+          {/* User Info with Profile Picture */}
           <div style={{
             background: 'var(--earth-700)',
             borderRadius: '12px',
             padding: '1rem',
-            marginBottom: '2rem'
+            marginBottom: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
           }}>
-            <div style={{ fontWeight: '600', color: 'white' }}>{user?.name}</div>
-            <div style={{ fontSize: '0.875rem', color: 'var(--earth-300)' }}>
-              {user?.role === 'creator' ? '🎪 Event Creator' : '🎟️ Event Attendee'}
+            <img
+              src={user?.profileImage || 'https://res.cloudinary.com/demo/image/upload/v1674576809/default-avatar.png'}
+              alt={user?.name}
+              style={{
+                width: '3rem',
+                height: '3rem',
+                borderRadius: '50%',
+                objectFit: 'cover'
+              }}
+            />
+            <div>
+              <div style={{ fontWeight: '600', color: 'white' }}>{user?.name}</div>
+              <div style={{ fontSize: '0.875rem', color: 'var(--earth-300)' }}>
+                {user?.role === 'creator' ? '🎪 Event Creator' : '🎟️ Event Attendee'}
+              </div>
             </div>
           </div>
 
@@ -169,6 +185,32 @@ export default function Layout() {
             >
               <HomeIcon style={{ width: '1.25rem', height: '1.25rem' }} />
               <span>Dashboard</span>
+            </Link>
+
+            <Link 
+              to="/app/profile" 
+              onClick={closeMobileMenu}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.75rem 1rem',
+                color: 'var(--earth-200)',
+                textDecoration: 'none',
+                borderRadius: '8px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--earth-700)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--earth-200)';
+              }}
+            >
+              <UserCircleIcon style={{ width: '1.25rem', height: '1.25rem' }} />
+              <span>Profile</span>
             </Link>
 
             <Link 

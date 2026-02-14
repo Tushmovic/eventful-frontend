@@ -9,6 +9,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  profileImage: string;
 }
 
 interface AuthContextType {
@@ -17,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => void;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,17 +56,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-const register = async (userData: any) => {
-  try {
-    const response = await axios.post(`${API_URL}/auth/register`, userData);
-    toast.success('Registration successful! Please login.');
-    return response.data;
-  } catch (error: any) {
-    console.error('AuthContext register error:', error.response?.data);
-    toast.error(error.response?.data?.message || 'Registration failed');
-    throw error;
-  }
-};
+  const register = async (userData: any) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/register`, userData);
+      toast.success('Registration successful! Please login.');
+      return response.data;
+    } catch (error: any) {
+      console.error('AuthContext register error:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Registration failed');
+      throw error;
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -74,8 +76,14 @@ const register = async (userData: any) => {
     toast.success('See you soon! 👋');
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      setUser({ ...user, ...userData });
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

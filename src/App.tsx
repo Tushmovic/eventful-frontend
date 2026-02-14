@@ -16,6 +16,7 @@ import VerifyTicket from './pages/VerifyTicket';
 import PaymentCallback from './pages/PaymentCallback';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailed from './pages/PaymentFailed';
+import Profile from './pages/Profile';
 
 // New public pages
 import PublicEvents from './pages/PublicEvents';
@@ -53,7 +54,7 @@ function App() {
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/failed" element={<PaymentFailed />} />
           
-          {/* 🔥 NEW: Public event browsing routes */}
+          {/* Public event browsing routes */}
           <Route path="/events" element={<PublicEvents />} />
           <Route path="/events/:id" element={<PublicEventDetails />} />
           
@@ -79,6 +80,7 @@ function App() {
           <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/app/dashboard" />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="events" element={<Events />} />
             <Route path="events/:id" element={<EventDetails />} />
             <Route path="my-tickets" element={<MyTickets />} />
