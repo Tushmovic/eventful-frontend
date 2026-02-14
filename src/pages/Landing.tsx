@@ -176,7 +176,7 @@ export default function Landing() {
           <div style={{ display: 'flex', gap: '1rem' }}>
             <Link to="/login" style={{
               padding: '0.5rem 1.5rem',
-              background: 'transparent',
+              background: 'var(--earth-600)',
               border: '1px solid var(--earth-300)',
               color: 'white',
               borderRadius: '8px',
