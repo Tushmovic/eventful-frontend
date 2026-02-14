@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { CalendarIcon, MapPinIcon, CurrencyDollarIcon, TicketIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -15,16 +15,20 @@ export default function EventDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) {
+      navigate('/app/events');
+      return;
+    }
     fetchEvent();
   }, [id]);
 
   const fetchEvent = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/events/${id}?incrementViews=true`, {
-        headers: { Authorization: `Bearer ${token}` } // 🔥 FIX: Add token to request
+        headers: { Authorization: `Bearer ${token}` }
       });
       setEvent(data.data);
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Failed to load event');
       navigate('/app/events');
     } finally {
@@ -60,7 +64,14 @@ export default function EventDetails() {
     );
   }
 
-  if (!event) return null;
+  if (!event) {
+    return (
+      <div style={{ textAlign: 'center', padding: '3rem' }}>
+        <h2>Event not found</h2>
+        <button onClick={() => navigate('/app/events')}>Back to Events</button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -146,9 +157,6 @@ export default function EventDetails() {
           >
             {event.availableTickets === 0 ? 'Sold Out' : 'Buy Ticket'}
           </button>
-          <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: 'var(--earth-500)' }}>
-            Secure payment via Paystack
-          </div>
         </div>
       </div>
     </div>
