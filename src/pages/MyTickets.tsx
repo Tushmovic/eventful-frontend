@@ -26,6 +26,7 @@ interface Ticket {
 export default function MyTickets() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [qrErrors, setQrErrors] = useState<Record<string, boolean>>({});
   const { token } = useAuth();
 
   useEffect(() => {
@@ -38,11 +39,23 @@ export default function MyTickets() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTickets(data.data.tickets);
+      
+      // Log QR code URLs for debugging
+      data.data.tickets.forEach((ticket: Ticket) => {
+        if (ticket.qrCode) {
+          console.log(`Ticket ${ticket.ticketNumber} QR URL:`, ticket.qrCode);
+        }
+      });
     } catch (error) {
       toast.error('Failed to fetch tickets');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleQrError = (ticketId: string, qrUrl: string) => {
+    console.error(`QR code failed to load for ticket ${ticketId}:`, qrUrl);
+    setQrErrors(prev => ({ ...prev, [ticketId]: true }));
   };
 
   const getStatusColor = (status: string) => {
@@ -127,12 +140,53 @@ export default function MyTickets() {
                 <p>🕐 Purchased: {new Date(ticket.purchaseDate).toLocaleDateString()}</p>
               </div>
 
-              {ticket.qrCode && ticket.status === 'confirmed' && (
+              {ticket.qrCode && ticket.status === 'confirmed' && !qrErrors[ticket._id] && (
                 <div className="qr-code">
                   <p style={{ fontSize: '0.75rem', color: 'var(--secondary-500)', marginBottom: '0.5rem' }}>
                     Scan at event entrance
                   </p>
-                  <img src={ticket.qrCode} alt="Ticket QR Code" />
+                  <img 
+                    src={ticket.qrCode} 
+                    alt="Ticket QR Code"
+                    style={{ maxWidth: '150px', maxHeight: '150px' }}
+                    onError={() => handleQrError(ticket._id, ticket.qrCode)}
+                    onLoad={() => console.log(`QR code loaded for ticket ${ticket.ticketNumber}`)}
+                  />
+                </div>
+              )}
+
+              {ticket.qrCode && qrErrors[ticket._id] && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  background: '#fff3cd',
+                  border: '1px solid #ffeeba',
+                  borderRadius: '0.5rem',
+                  color: '#856404',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ marginBottom: '0.5rem' }}>⚠️ QR code temporarily unavailable</p>
+                  <p style={{ fontSize: '0.875rem' }}>Ticket ID: {ticket.ticketNumber}</p>
+                  <button
+                    onClick={() => {
+                      setQrErrors(prev => ({ ...prev, [ticket._id]: false }));
+                      // Force reload the image by toggling state
+                      setTimeout(() => {
+                        setQrErrors(prev => ({ ...prev, [ticket._id]: false }));
+                      }, 100);
+                    }}
+                    style={{
+                      marginTop: '0.5rem',
+                      padding: '0.25rem 1rem',
+                      background: 'var(--earth-600)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Retry
+                  </button>
                 </div>
               )}
 
