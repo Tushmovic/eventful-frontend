@@ -23,10 +23,13 @@ import {
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 export default function Landing() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
@@ -40,6 +43,15 @@ export default function Landing() {
     { name: 'Render', logo: 'https://cdn.worldvectorlogo.com/logos/render.svg' },
     { name: 'Vite', logo: 'https://cdn.worldvectorlogo.com/logos/vitejs.svg' },
   ];
+
+  // Scroll effect for sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Auto-slide partners
   useEffect(() => {
@@ -150,48 +162,151 @@ export default function Landing() {
     }
   };
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      {/* Navigation */}
-      <nav style={{
-        background: 'var(--earth-800)',
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        color: 'white',
+      {/* Sticky Header with Hamburger Menu */}
+      <div style={{
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+        width: '100%',
+        transition: 'all 0.3s ease',
+        boxShadow: scrolled ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '2rem' }}>🎭</span>
-          <span style={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Alaya Eventful</span>
-        </div>
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <a href="#features" style={{ color: 'var(--earth-200)', textDecoration: 'none' }}>Features</a>
-          <a href="#how-it-works" style={{ color: 'var(--earth-200)', textDecoration: 'none' }}>How It Works</a>
-          <a href="#partners" style={{ color: 'var(--earth-200)', textDecoration: 'none' }}>Partners</a>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <Link to="/login" style={{
-              padding: '0.5rem 1.5rem',
-              background: 'var(--earth-600)',
-              border: '1px solid var(--earth-300)',
-              color: 'white',
-              borderRadius: '8px',
-              textDecoration: 'none'
-            }}>Login</Link>
-            <Link to="/register" style={{
-              padding: '0.5rem 1.5rem',
-              background: 'var(--earth-600)',
-              color: 'white',
-              borderRadius: '8px',
-              textDecoration: 'none'
-            }}>Sign Up</Link>
+        {/* Top Bar */}
+        <div style={{
+          background: scrolled ? 'var(--earth-800)' : 'var(--earth-800)',
+          color: 'white',
+          padding: '0.75rem 1rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button
+              onClick={toggleMobileMenu}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                padding: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {mobileMenuOpen ? (
+                <XMarkIcon style={{ width: '1.5rem', height: '1.5rem' }} />
+              ) : (
+                <Bars3Icon style={{ width: '1.5rem', height: '1.5rem' }} />
+              )}
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.5rem' }}>🎭</span>
+              <span style={{ fontWeight: 'bold', fontSize: '1.125rem', color: 'white' }}>Alaya Eventful</span>
+            </div>
+          </div>
+          
+          {/* Sticky Auth Buttons - Only on Landing Page */}
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Link 
+              to="/login" 
+              style={{
+                padding: '0.4rem 1rem',
+                background: scrolled ? 'var(--earth-600)' : 'transparent',
+                border: '1px solid var(--earth-300)',
+                color: 'white',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              Login
+            </Link>
+            <Link 
+              to="/register" 
+              style={{
+                padding: '0.4rem 1rem',
+                background: 'var(--earth-500)',
+                color: 'white',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              Sign Up
+            </Link>
           </div>
         </div>
-      </nav>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div style={{
+            background: 'var(--earth-700)',
+            borderTop: '1px solid var(--earth-600)',
+            padding: '1rem',
+            animation: 'slideDown 0.3s ease'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <a 
+                href="#features" 
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  color: 'var(--earth-200)',
+                  textDecoration: 'none',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--earth-600)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                Features
+              </a>
+              <a 
+                href="#how-it-works" 
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  color: 'var(--earth-200)',
+                  textDecoration: 'none',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--earth-600)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                How It Works
+              </a>
+              <a 
+                href="#partners" 
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  color: 'var(--earth-200)',
+                  textDecoration: 'none',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--earth-600)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                Partners
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Hero Section */}
       <div className="hero-section" style={{
