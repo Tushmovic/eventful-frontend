@@ -15,13 +15,13 @@ import MyTickets from './pages/MyTickets';
 import Bookmarks from './pages/Bookmarks';
 import CreateEvent from './pages/CreateEvent';
 import Analytics from './pages/Analytics';
+import AttendeeAnalytics from './pages/AttendeeAnalytics'; // 🔥 NEW
 import VerifyTicket from './pages/VerifyTicket';
 import PaymentCallback from './pages/PaymentCallback';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailed from './pages/PaymentFailed';
 import Profile from './pages/Profile';
 import Contact from './pages/Contact';
-
 
 // Public pages
 import PublicEvents from './pages/PublicEvents';
@@ -92,6 +92,7 @@ function App() {
               <Route path="bookmarks" element={<Bookmarks />} />
               <Route path="create-event" element={<CreateEvent />} />
               <Route path="analytics" element={<Analytics />} />
+              <Route path="attendee-analytics" element={<AttendeeAnalytics />} /> {/* 🔥 NEW */}
               <Route path="verify" element={<VerifyTicket />} />
             </Route>
           </Routes>

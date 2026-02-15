@@ -35,7 +35,7 @@ interface UserProfile {
 }
 
 export default function Profile() {
-  const { user, token } = useAuth();
+  const { user, token, updateUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -98,16 +98,68 @@ export default function Profile() {
 
   const handleSubmit = async () => {
     try {
+      const cleanedData: any = {};
+      
+      if (formData.name !== profile?.name) {
+        cleanedData.name = formData.name;
+      }
+      
+      if (formData.phoneNumber !== profile?.phoneNumber) {
+        cleanedData.phoneNumber = formData.phoneNumber || '';
+      }
+      
+      if (formData.bio !== profile?.bio) {
+        cleanedData.bio = formData.bio || '';
+      }
+      
+      if (formData.website !== profile?.website) {
+        cleanedData.website = formData.website || '';
+      }
+      
+      const socialMedia: any = {};
+      let hasSocialMedia = false;
+      
+      if (formData.socialMedia.twitter !== profile?.socialMedia?.twitter) {
+        socialMedia.twitter = formData.socialMedia.twitter || '';
+        hasSocialMedia = true;
+      }
+      if (formData.socialMedia.facebook !== profile?.socialMedia?.facebook) {
+        socialMedia.facebook = formData.socialMedia.facebook || '';
+        hasSocialMedia = true;
+      }
+      if (formData.socialMedia.instagram !== profile?.socialMedia?.instagram) {
+        socialMedia.instagram = formData.socialMedia.instagram || '';
+        hasSocialMedia = true;
+      }
+      if (formData.socialMedia.linkedin !== profile?.socialMedia?.linkedin) {
+        socialMedia.linkedin = formData.socialMedia.linkedin || '';
+        hasSocialMedia = true;
+      }
+      
+      if (hasSocialMedia) {
+        cleanedData.socialMedia = socialMedia;
+      }
+
+      if (Object.keys(cleanedData).length === 0) {
+        toast.success('No changes to save');
+        setEditing(false);
+        return;
+      }
+
       const response = await axios.put(
         `${API_URL}/auth/profile`,
-        formData,
+        cleanedData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       setProfile(response.data.data);
+      if (user && response.data.data.name) {
+        updateUser({ ...user, name: response.data.data.name });
+      }
       setEditing(false);
       toast.success('Profile updated successfully');
     } catch (error: any) {
+      console.error('Update error:', error.response?.data);
       toast.error(error.response?.data?.message || 'Failed to update profile');
     }
   };
@@ -115,6 +167,9 @@ export default function Profile() {
   const handleImageUploadSuccess = (imageUrl: string) => {
     if (profile) {
       setProfile({ ...profile, profileImage: imageUrl });
+      if (user) {
+        updateUser({ ...user, profileImage: imageUrl });
+      }
     }
   };
 
@@ -210,6 +265,13 @@ export default function Profile() {
                 value={formData.name}
                 onChange={handleInputChange}
                 className="form-control"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
@@ -224,6 +286,13 @@ export default function Profile() {
                 onChange={handleInputChange}
                 className="form-control"
                 placeholder="+234 800 000 0000"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
@@ -231,13 +300,35 @@ export default function Profile() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
                 Bio
               </label>
+              {/* 🔥 FIX: Bio textarea now matches Create Event description box */}
               <textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleInputChange}
-                className="form-textarea"
-                rows={4}
+                rows={6}
                 placeholder="Tell us about yourself..."
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  lineHeight: '1.6',
+                  minHeight: '150px',
+                  backgroundColor: 'var(--cream)'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--sage-500)';
+                  e.target.style.boxShadow = '0 0 0 3px var(--sage-100)';
+                  e.target.style.backgroundColor = 'white';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--earth-300)';
+                  e.target.style.boxShadow = 'none';
+                  e.target.style.backgroundColor = 'var(--cream)';
+                }}
               />
             </div>
 
@@ -252,6 +343,13 @@ export default function Profile() {
                 onChange={handleInputChange}
                 className="form-control"
                 placeholder="https://example.com"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--earth-300)',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
@@ -268,6 +366,13 @@ export default function Profile() {
                     onChange={(e) => handleSocialChange('twitter', e.target.value)}
                     className="form-control"
                     placeholder="https://twitter.com/username"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
                   />
                 </div>
                 <div>
@@ -278,6 +383,13 @@ export default function Profile() {
                     onChange={(e) => handleSocialChange('facebook', e.target.value)}
                     className="form-control"
                     placeholder="https://facebook.com/username"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
                   />
                 </div>
                 <div>
@@ -288,6 +400,13 @@ export default function Profile() {
                     onChange={(e) => handleSocialChange('instagram', e.target.value)}
                     className="form-control"
                     placeholder="https://instagram.com/username"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
                   />
                 </div>
                 <div>
@@ -298,6 +417,13 @@ export default function Profile() {
                     onChange={(e) => handleSocialChange('linkedin', e.target.value)}
                     className="form-control"
                     placeholder="https://linkedin.com/in/username"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
                   />
                 </div>
               </div>
@@ -316,7 +442,18 @@ export default function Profile() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
+                fontSize: '1rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--earth-700)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--earth-600)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
               }}
             >
               <CheckIcon style={{ width: '1.25rem' }} />
@@ -374,7 +511,14 @@ export default function Profile() {
             {profile.bio && (
               <div>
                 <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>About</h3>
-                <p style={{ color: 'var(--earth-700)', lineHeight: '1.6' }}>{profile.bio}</p>
+                <p style={{ 
+                  color: 'var(--earth-700)', 
+                  lineHeight: '1.8',
+                  padding: '1rem',
+                  background: 'var(--earth-50)',
+                  borderRadius: '8px',
+                  border: '1px solid var(--earth-200)'
+                }}>{profile.bio}</p>
               </div>
             )}
 
@@ -383,16 +527,16 @@ export default function Profile() {
                 <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>Social Media</h3>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   {profile.socialMedia.twitter && (
-                    <a href={profile.socialMedia.twitter} target="_blank" rel="noopener noreferrer">🐦 Twitter</a>
+                    <a href={profile.socialMedia.twitter} target="_blank" rel="noopener noreferrer" style={{ color: '#1DA1F2' }}>🐦 Twitter</a>
                   )}
                   {profile.socialMedia.facebook && (
-                    <a href={profile.socialMedia.facebook} target="_blank" rel="noopener noreferrer">📘 Facebook</a>
+                    <a href={profile.socialMedia.facebook} target="_blank" rel="noopener noreferrer" style={{ color: '#1877F2' }}>📘 Facebook</a>
                   )}
                   {profile.socialMedia.instagram && (
-                    <a href={profile.socialMedia.instagram} target="_blank" rel="noopener noreferrer">📷 Instagram</a>
+                    <a href={profile.socialMedia.instagram} target="_blank" rel="noopener noreferrer" style={{ color: '#E4405F' }}>📷 Instagram</a>
                   )}
                   {profile.socialMedia.linkedin && (
-                    <a href={profile.socialMedia.linkedin} target="_blank" rel="noopener noreferrer">🔗 LinkedIn</a>
+                    <a href={profile.socialMedia.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: '#0A66C2' }}>🔗 LinkedIn</a>
                   )}
                 </div>
               </div>

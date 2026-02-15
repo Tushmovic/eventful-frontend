@@ -19,6 +19,7 @@ interface AuthContextType {
   register: (data: any) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+  switchRole: (newRole: string) => Promise<void>; // 🔥 NEW
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,8 +83,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // 🔥 NEW: Switch user role
+  const switchRole = async (newRole: string) => {
+    if (user) {
+      setUser({ ...user, role: newRole });
+      toast.success(`Switched to ${newRole} account`);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, updateUser, switchRole }}>
       {children}
     </AuthContext.Provider>
   );

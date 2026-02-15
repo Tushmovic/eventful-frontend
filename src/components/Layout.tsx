@@ -11,8 +11,10 @@ import {
   UserCircleIcon,
   Bars3Icon,
   XMarkIcon,
-  HeartIcon
+  HeartIcon,
+  ChartPieIcon // 🔥 NEW
 } from '@heroicons/react/24/outline';
+import AccountSwitcher from './AccountSwitcher';
 
 export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -132,33 +134,35 @@ export default function Layout() {
             </div>
           </div>
 
-          {/* User Info with Profile Picture */}
-          <div style={{
-            background: 'var(--earth-700)',
-            borderRadius: '12px',
-            padding: '1rem',
-            marginBottom: '2rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem'
-          }}>
-            <img
-              src={user?.profileImage || 'https://res.cloudinary.com/demo/image/upload/v1674576809/default-avatar.png'}
-              alt={user?.name}
-              style={{
-                width: '3rem',
-                height: '3rem',
-                borderRadius: '50%',
-                objectFit: 'cover'
-              }}
-            />
-            <div>
-              <div style={{ fontWeight: '600', color: 'white' }}>{user?.name}</div>
-              <div style={{ fontSize: '0.875rem', color: 'var(--earth-300)' }}>
-                {user?.role === 'creator' ? '🎪 Event Creator' : '🎟️ Event Attendee'}
-              </div>
-            </div>
-          </div>
+          {/* User Info with Profile Picture and Account Switcher */}
+<div style={{
+  background: 'var(--earth-700)',
+  borderRadius: '12px',
+  padding: '1rem',
+  marginBottom: '2rem'
+}}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+    <img
+      src={user?.profileImage || 'https://res.cloudinary.com/demo/image/upload/v1674576809/default-avatar.png'}
+      alt={user?.name}
+      style={{
+        width: '3rem',
+        height: '3rem',
+        borderRadius: '50%',
+        objectFit: 'cover'
+      }}
+    />
+    <div>
+      <div style={{ fontWeight: '600', color: 'white' }}>{user?.name}</div>
+      <div style={{ fontSize: '0.875rem', color: 'var(--earth-300)' }}>
+        {user?.role === 'creator' ? '🎪 Event Creator' : '🎟️ Event Attendee'}
+      </div>
+    </div>
+  </div>
+  
+  {/* 🔥 NEW: Account Switcher */}
+  <AccountSwitcher />
+</div>
 
           {/* Navigation */}
           <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -265,6 +269,7 @@ export default function Layout() {
               <TicketIcon style={{ width: '1.25rem', height: '1.25rem' }} />
               <span>My Tickets</span>
             </Link>
+
             <Link 
               to="/app/bookmarks" 
               onClick={closeMobileMenu}
@@ -289,6 +294,33 @@ export default function Layout() {
             >
               <HeartIcon style={{ width: '1.25rem', height: '1.25rem' }} />
               <span>Bookmarks</span>
+            </Link>
+
+            {/* 🔥 NEW: Attendee Analytics Link (visible to everyone) */}
+            <Link 
+              to="/app/attendee-analytics" 
+              onClick={closeMobileMenu}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.75rem 1rem',
+                color: 'var(--earth-200)',
+                textDecoration: 'none',
+                borderRadius: '8px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--earth-700)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--earth-200)';
+              }}
+            >
+              <ChartPieIcon style={{ width: '1.25rem', height: '1.25rem' }} />
+              <span>My Analytics</span>
             </Link>
 
             {user?.role === 'creator' && (
@@ -342,7 +374,7 @@ export default function Layout() {
                   }}
                 >
                   <ChartBarIcon style={{ width: '1.25rem', height: '1.25rem' }} />
-                  <span>Analytics</span>
+                  <span>Creator Analytics</span>
                 </Link>
               </>
             )}
