@@ -21,6 +21,7 @@ import PaymentFailed from './pages/PaymentFailed';
 import Profile from './pages/Profile';
 import Contact from './pages/Contact';
 
+
 // Public pages
 import PublicEvents from './pages/PublicEvents';
 import PublicEventDetails from './pages/PublicEventDetails';
