@@ -213,7 +213,7 @@ export default function PublicEvents() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <CurrencyDollarIcon style={{ width: '1rem', color: 'var(--earth-500)' }} />
                       <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--earth-700)' }}>
-                        ₦{event.ticketPrice.toLocaleString()}
+                        ₦{(event.ticketPrice / 100).toLocaleString()}
                       </span>
                     </div>
                   </div>

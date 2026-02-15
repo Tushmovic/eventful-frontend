@@ -163,7 +163,7 @@ export default function MyTickets() {
               <div style={{ margin: '1rem 0', color: 'var(--secondary-600)', fontSize: '0.875rem' }}>
                 <p>📅 {ticket.event?.date ? new Date(ticket.event.date).toLocaleDateString('en-NG') : 'Date unavailable'}</p>
                 <p>📍 {ticket.event?.location?.venue || 'Venue unavailable'}, {ticket.event?.location?.city || ''}</p>
-                <p>💰 ₦{ticket.price.toLocaleString()}</p>
+                <p>💰 ₦{(ticket.price / 100).toLocaleString()}</p>
                 <p>🕐 Purchased: {new Date(ticket.purchaseDate).toLocaleDateString()}</p>
               </div>
 
