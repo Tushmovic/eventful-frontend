@@ -193,7 +193,7 @@ export default function PublicEventDetails() {
               top: '2rem'
             }}>
               <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--earth-800)', marginBottom: '1rem' }}>
-                ₦{(event.ticketPrice / 100).toLocaleString()}
+                ₦{event.ticketPrice.toLocaleString()}
               </div>
               
               <div style={{ marginBottom: '1.5rem', color: 'var(--earth-600)' }}>

@@ -553,7 +553,7 @@ export default function Bookmarks() {
                   <p>📍 {bookmark.event.location.venue}, {bookmark.event.location.city}</p>
                   <p>🎫 {bookmark.event.availableTickets} / {bookmark.event.totalTickets} tickets left</p>
                   <p style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-700)' }}>
-                    ₦{(bookmark.event.ticketPrice / 100).toLocaleString()}
+                    ₦{bookmark.event.ticketPrice.toLocaleString()}
                   </p>
                 </div>
 

@@ -142,8 +142,8 @@ export default function Events() {
 
     // Price filter
     filtered = filtered.filter(e => 
-      e.ticketPrice / 100 >= priceRange[0] && 
-      e.ticketPrice / 100 <= priceRange[1]
+      e.ticketPrice >= priceRange[0] && 
+      e.ticketPrice <= priceRange[1]
     );
 
     // Date filter
@@ -843,7 +843,7 @@ export default function Events() {
                     <p style={{ color: '#f59e0b', fontSize: '0.875rem' }}>⏰ Join waitlist</p>
                   )}
                   <p style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-700)' }}>
-                    ₦{(event.ticketPrice / 100).toLocaleString()}
+                    ₦{event.ticketPrice.toLocaleString()}
                   </p>
                 </div>
                 

@@ -643,7 +643,7 @@ export default function CreateEvent() {
                 }}
               />
               <small style={{ color: 'var(--earth-500)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
-                Enter price in Naira (e.g., 5000 for ₦5,000). Converted to kobo for payment processing.
+                Enter price in Naira (e.g., 5000 for ₦5,000)
               </small>
             </div>
 

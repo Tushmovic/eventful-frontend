@@ -127,7 +127,7 @@ export default function EventDetails() {
                 <CurrencyDollarIcon style={{ width: '1.5rem', color: 'var(--earth-600)' }} />
                 <div>
                   <div style={{ fontWeight: 'bold' }}>Ticket Price</div>
-                  <div>₦{(event.ticketPrice / 100).toLocaleString()}</div>
+                  <div>₦{event.ticketPrice.toLocaleString()}</div>
                 </div>
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function EventDetails() {
         }}>
           <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Get Tickets</h3>
           <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--earth-700)', marginBottom: '1rem' }}>
-            ₦{(event.ticketPrice / 100).toLocaleString()}
+            ₦{event.ticketPrice.toLocaleString()}
           </div>
           <div style={{ marginBottom: '1rem', color: 'var(--earth-600)' }}>
             🎫 {event.availableTickets} tickets left
