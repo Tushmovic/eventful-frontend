@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, HeartIcon as HeartOutline } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import { 
   FaWhatsapp, 
   FaFacebookF, 
@@ -12,7 +13,9 @@ import {
   FaTiktok,
   FaEnvelope,
   FaLink,
-  FaShareAlt
+  FaShareAlt,
+  FaSearch,
+  FaFilter
 } from 'react-icons/fa';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
@@ -33,17 +36,38 @@ interface Event {
   images: string[];
 }
 
+interface Bookmark {
+  eventId: string;
+}
+
 export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeShareId, setActiveShareId] = useState<string | null>(null);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
+    start: '',
+    end: ''
+  });
+
   const { token, user } = useAuth();
 
   useEffect(() => {
     fetchEvents();
+    fetchBookmarks();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [events, searchTerm, selectedCategory, priceRange, dateRange]);
 
   const fetchEvents = async () => {
     try {
@@ -51,11 +75,86 @@ export default function Events() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setEvents(data.data.events);
+      setFilteredEvents(data.data.events);
     } catch (error) {
       toast.error('Failed to fetch events');
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchBookmarks = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/bookmarks/my`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const bookmarkSet = new Set(data.data.map((b: { eventId: string }) => b.eventId));
+      setBookmarks(bookmarkSet as Set<string>);
+    } catch (error) {
+      console.log('No bookmarks yet');
+    }
+  };
+
+  const toggleBookmark = async (eventId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      await axios.post(
+        `${API_URL}/bookmarks/toggle/${eventId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setBookmarks(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(eventId)) {
+          newSet.delete(eventId);
+          toast.success('Removed from bookmarks');
+        } else {
+          newSet.add(eventId);
+          toast.success('Added to bookmarks');
+        }
+        return newSet;
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to toggle bookmark');
+    }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...events];
+
+    // Category filter
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(e => e.category === selectedCategory);
+    }
+
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(e => 
+        e.title.toLowerCase().includes(term) ||
+        e.description.toLowerCase().includes(term) ||
+        e.location.city.toLowerCase().includes(term)
+      );
+    }
+
+    // Price filter
+    filtered = filtered.filter(e => 
+      e.ticketPrice / 100 >= priceRange[0] && 
+      e.ticketPrice / 100 <= priceRange[1]
+    );
+
+    // Date filter
+    if (dateRange.start) {
+      filtered = filtered.filter(e => new Date(e.date) >= new Date(dateRange.start));
+    }
+    if (dateRange.end) {
+      filtered = filtered.filter(e => new Date(e.date) <= new Date(dateRange.end));
+    }
+
+    setFilteredEvents(filtered);
   };
 
   const purchaseTicket = async (eventId: string) => {
@@ -105,9 +204,6 @@ export default function Events() {
   };
 
   const categories = ['All', ...new Set(events.map(e => e.category))];
-  const filteredEvents = selectedCategory === 'All' 
-    ? events 
-    : events.filter(e => e.category === selectedCategory);
 
   if (loading) {
     return (
@@ -122,11 +218,165 @@ export default function Events() {
 
   return (
     <div className="container">
-      <div className="flex justify-between items-center" style={{ marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--secondary-900)' }}>
-          🎪 Upcoming Events
-        </h1>
-        
+      {/* Header with Search */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div className="flex justify-between items-center" style={{ marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--secondary-900)' }}>
+            🎪 Upcoming Events
+          </h1>
+          
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            style={{
+              padding: '0.5rem 1rem',
+              background: showFilters ? 'var(--earth-600)' : 'var(--earth-100)',
+              color: showFilters ? 'white' : 'var(--earth-700)',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <FaFilter />
+            {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{
+          display: 'flex',
+          gap: '1rem',
+          marginBottom: '1rem',
+          background: 'white',
+          padding: '0.5rem',
+          borderRadius: '12px',
+          boxShadow: 'var(--shadow-sm)',
+          border: '1px solid var(--earth-200)'
+        }}>
+          <FaSearch style={{ color: 'var(--earth-400)', marginLeft: '0.5rem', alignSelf: 'center' }} />
+          <input
+            type="text"
+            placeholder="Search events by title, description, or location..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              flex: 1,
+              padding: '0.75rem',
+              border: 'none',
+              outline: 'none',
+              fontSize: '1rem'
+            }}
+          />
+        </div>
+
+        {/* Advanced Filters */}
+        {showFilters && (
+          <div style={{
+            background: 'white',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            marginBottom: '1.5rem',
+            boxShadow: 'var(--shadow-md)',
+            border: '1px solid var(--earth-200)'
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+              {/* Category Filter */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                  Category
+                </label>
+                <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
+                  {categories.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '9999px',
+                        border: 'none',
+                        background: selectedCategory === category ? 'var(--earth-600)' : 'var(--earth-100)',
+                        color: selectedCategory === category ? 'white' : 'var(--earth-700)',
+                        fontWeight: '500',
+                        fontSize: '0.875rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range Filter */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                  Price Range (₦)
+                </label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={priceRange[0]}
+                    onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+                    style={{
+                      width: '100px',
+                      padding: '0.5rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '6px'
+                    }}
+                  />
+                  <span>-</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                    style={{
+                      width: '100px',
+                      padding: '0.5rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '6px'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Date Range Filter */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                  Date Range
+                </label>
+                <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    style={{
+                      padding: '0.5rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '6px'
+                    }}
+                  />
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                    style={{
+                      padding: '0.5rem',
+                      border: '1px solid var(--earth-300)',
+                      borderRadius: '6px'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Category quick filters */}
         <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
           {categories.map(category => (
             <button
@@ -148,18 +398,23 @@ export default function Events() {
             </button>
           ))}
         </div>
+
+        {/* Results count */}
+        <p style={{ marginTop: '1rem', color: 'var(--earth-600)', fontSize: '0.875rem' }}>
+          Showing {filteredEvents.length} of {events.length} events
+        </p>
       </div>
 
       {filteredEvents.length === 0 ? (
         <div style={{ 
           textAlign: 'center', 
-          padding: '3rem', 
+          padding: '4rem 2rem', 
           background: 'var(--white)', 
           borderRadius: 'var(--border-radius)' 
         }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>😢</div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>No events found</h3>
-          <p style={{ color: 'var(--secondary-600)' }}>Check back later for new events!</p>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔍</div>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem' }}>No events found</h3>
+          <p style={{ color: 'var(--secondary-600)' }}>Try adjusting your filters or check back later!</p>
         </div>
       ) : (
         <div className="events-grid">
@@ -169,7 +424,35 @@ export default function Events() {
               key={event._id} 
               style={{ textDecoration: 'none' }}
             >
-              <div className="event-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <div className="event-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                {/* Bookmark Button */}
+                <button
+                  onClick={(e) => toggleBookmark(event._id, e)}
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    background: 'white',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '2.5rem',
+                    height: '2.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: 'var(--shadow-md)',
+                    zIndex: 5,
+                    color: bookmarks.has(event._id) ? '#ef4444' : 'var(--earth-400)'
+                  }}
+                >
+                  {bookmarks.has(event._id) ? (
+                    <HeartSolid style={{ width: '1.25rem', height: '1.25rem' }} />
+                  ) : (
+                    <HeartOutline style={{ width: '1.25rem', height: '1.25rem' }} />
+                  )}
+                </button>
+
                 {event.images && event.images.length > 0 ? (
                   <img 
                     src={event.images[0]} 
@@ -202,314 +485,313 @@ export default function Events() {
                   <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{event.title}</h3>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                     {/* Share Button */}
-<div style={{ position: 'relative' }}>
-  <button
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setActiveShareId(activeShareId === event._id ? null : event._id);
-    }}
-    style={{
-      background: 'none',
-      border: 'none',
-      fontSize: '1.2rem',
-      cursor: 'pointer',
-      padding: '8px',
-      borderRadius: '50%',
-      transition: 'all 0.2s',
-      color: 'var(--earth-600)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background = 'var(--earth-100)';
-      e.currentTarget.style.color = 'var(--earth-800)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background = 'none';
-      e.currentTarget.style.color = 'var(--earth-600)';
-    }}
-    title="Share event"
-  >
-    <FaShareAlt size={18} />
-  </button>
-  
-  {activeShareId === event._id && (
-    <div style={{
-      position: 'absolute',
-      top: '100%',
-      right: 0,
-      background: 'white',
-      borderRadius: '16px',
-      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-      padding: '1rem',
-      zIndex: 50,
-      minWidth: '280px',
-      border: '1px solid var(--earth-200)',
-      animation: 'slideDown 0.2s ease'
-    }}>
-      <p style={{ 
-        fontSize: '0.875rem', 
-        fontWeight: '600', 
-        color: 'var(--earth-700)',
-        marginBottom: '0.75rem',
-        paddingBottom: '0.5rem',
-        borderBottom: '1px solid var(--earth-200)'
-      }}>
-        Share this event
-      </p>
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setActiveShareId(activeShareId === event._id ? null : event._id);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '8px',
+                          borderRadius: '50%',
+                          transition: 'all 0.2s',
+                          color: 'var(--earth-600)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'var(--earth-100)';
+                          e.currentTarget.style.color = 'var(--earth-800)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'none';
+                          e.currentTarget.style.color = 'var(--earth-600)';
+                        }}
+                        title="Share event"
+                      >
+                        <FaShareAlt size={18} />
+                      </button>
+                      
+                      {activeShareId === event._id && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          background: 'white',
+                          borderRadius: '16px',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                          padding: '1rem',
+                          zIndex: 50,
+                          minWidth: '280px',
+                          border: '1px solid var(--earth-200)',
+                          animation: 'slideDown 0.2s ease'
+                        }}>
+                          <p style={{ 
+                            fontSize: '0.875rem', 
+                            fontWeight: '600', 
+                            color: 'var(--earth-700)',
+                            marginBottom: '0.75rem',
+                            paddingBottom: '0.5rem',
+                            borderBottom: '1px solid var(--earth-200)'
+                          }}>
+                            Share this event
+                          </p>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '0.75rem',
-        marginBottom: '0.75rem'
-      }}>
-        {/* WhatsApp */}
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(event.title)}%20${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, #25D366, #128C7E)',
-            color: 'white',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(37, 211, 102, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <FaWhatsapp size={12} />
-          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>WhatsApp</span>
-        </a>
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: '0.75rem',
+                            marginBottom: '0.75rem'
+                          }}>
+                            {/* WhatsApp */}
+                            <a
+                              href={`https://wa.me/?text=${encodeURIComponent(event.title)}%20${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: '0.75rem',
+                                background: 'linear-gradient(135deg, #25D366, #128C7E)',
+                                color: 'white',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(37, 211, 102, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <FaWhatsapp size={20} />
+                              <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>WhatsApp</span>
+                            </a>
 
-        {/* Facebook */}
-        <a
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, #1877F2, #0E5EBD)',
-            color: 'white',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(24, 119, 242, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <FaFacebookF size={12} />
-          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Facebook</span>
-        </a>
+                            {/* Facebook */}
+                            <a
+                              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: '0.75rem',
+                                background: 'linear-gradient(135deg, #1877F2, #0E5EBD)',
+                                color: 'white',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(24, 119, 242, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <FaFacebookF size={20} />
+                              <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Facebook</span>
+                            </a>
 
-        {/* Twitter */}
-        <a
-          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, #1DA1F2, #0C7ABF)',
-            color: 'white',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(29, 161, 242, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <FaTwitter size={12} />
-          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Twitter</span>
-        </a>
+                            {/* Twitter */}
+                            <a
+                              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: '0.75rem',
+                                background: 'linear-gradient(135deg, #1DA1F2, #0C7ABF)',
+                                color: 'white',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(29, 161, 242, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <FaTwitter size={20} />
+                              <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Twitter</span>
+                            </a>
 
-        {/* TikTok */}
-        <a
-          href={`https://www.tiktok.com/share?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, #000000, #333333)',
-            color: 'white',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <FaTiktok size={12} />
-          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>TikTok</span>
-        </a>
-      </div>
+                            {/* TikTok */}
+                            <a
+                              href={`https://www.tiktok.com/share?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: '0.75rem',
+                                background: 'linear-gradient(135deg, #000000, #333333)',
+                                color: 'white',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <FaTiktok size={20} />
+                              <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>TikTok</span>
+                            </a>
+                          </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '0.75rem'
-      }}>
-        {/* LinkedIn */}
-        <a
-          href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, #0A66C2, #004182)',
-            color: 'white',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(10, 102, 194, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <FaLinkedinIn size={12} />
-          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>LinkedIn</span>
-        </a>
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            gap: '0.75rem'
+                          }}>
+                            {/* LinkedIn */}
+                            <a
+                              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: '0.75rem',
+                                background: 'linear-gradient(135deg, #0A66C2, #004182)',
+                                color: 'white',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(10, 102, 194, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <FaLinkedinIn size={20} />
+                              <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>LinkedIn</span>
+                            </a>
 
-        {/* Email */}
-        <a
-          href={`mailto:?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent('Check out this event: ' + window.location.origin + '/app/events/' + event._id)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, #EA4335, #B23121)',
-            color: 'white',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(234, 67, 53, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <FaEnvelope size={12} />
-          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Email</span>
-        </a>
+                            {/* Email */}
+                            <a
+                              href={`mailto:?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent('Check out this event: ' + window.location.origin + '/app/events/' + event._id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: '0.75rem',
+                                background: 'linear-gradient(135deg, #EA4335, #B23121)',
+                                color: 'white',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(234, 67, 53, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <FaEnvelope size={20} />
+                              <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Email</span>
+                            </a>
 
-        {/* Copy Link */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            navigator.clipboard.writeText(window.location.origin + '/app/events/' + event._id);
-            toast.success('Link copied!');
-            setActiveShareId(null);
-          }}
-          style={{
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, var(--earth-600), var(--earth-800))',
-            color: 'white',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            textDecoration: 'none',
-            transition: 'all 0.2s',
-            border: 'none',
-            cursor: 'pointer',
-            width: '100%'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px var(--earth-600)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <FaLink size={12} />
-          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Copy Link</span>
-        </button>
-      </div>
-    </div>
-  )}
-</div>
+                            {/* Copy Link */}
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(window.location.origin + '/app/events/' + event._id);
+                                toast.success('Link copied!');
+                                setActiveShareId(null);
+                              }}
+                              style={{
+                                padding: '0.75rem',
+                                background: 'linear-gradient(135deg, var(--earth-600), var(--earth-800))',
+                                color: 'white',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s',
+                                border: 'none',
+                                cursor: 'pointer',
+                                width: '100%'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px var(--earth-600)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <FaLink size={20} />
+                              <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Copy Link</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     
                     {user?.role === 'creator' && (
                       <button
@@ -518,7 +800,6 @@ export default function Events() {
                         style={{
                           background: 'none',
                           border: 'none',
-                          fontSize: '1.2rem',
                           cursor: deletingId === event._id ? 'not-allowed' : 'pointer',
                           padding: '8px',
                           borderRadius: '50%',
@@ -558,6 +839,9 @@ export default function Events() {
                   })}</p>
                   <p>📍 {event.location.venue}, {event.location.city}</p>
                   <p>🎫 {event.availableTickets} / {event.totalTickets} tickets left</p>
+                  {event.availableTickets === 0 && (
+                    <p style={{ color: '#f59e0b', fontSize: '0.875rem' }}>⏰ Join waitlist</p>
+                  )}
                   <p style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-700)' }}>
                     ₦{(event.ticketPrice / 100).toLocaleString()}
                   </p>
