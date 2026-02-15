@@ -201,214 +201,315 @@ export default function Events() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{event.title}</h3>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
-                    {/* 🔥 NEW: Share Button with Beautiful Dropdown */}
-                    <div style={{ position: 'relative' }}>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setActiveShareId(activeShareId === event._id ? null : event._id);
-                        }}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          fontSize: '1.2rem',
-                          cursor: 'pointer',
-                          padding: '8px',
-                          borderRadius: '50%',
-                          transition: 'all 0.2s',
-                          color: 'var(--earth-600)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'var(--earth-100)';
-                          e.currentTarget.style.color = 'var(--earth-800)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'none';
-                          e.currentTarget.style.color = 'var(--earth-600)';
-                        }}
-                        title="Share event"
-                      >
-                        <FaShareAlt size={18} />
-                      </button>
-                      
-                      {activeShareId === event._id && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '100%',
-                          right: 0,
-                          background: 'white',
-                          borderRadius: '12px',
-                          boxShadow: 'var(--shadow-xl)',
-                          padding: '0.75rem',
-                          zIndex: 10,
-                          minWidth: '220px',
-                          border: '1px solid var(--earth-200)'
-                        }}>
-                          <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(4, 1fr)',
-                            gap: '0.5rem',
-                            marginBottom: '0.5rem'
-                          }}>
-                            <a
-                              href={`https://wa.me/?text=${encodeURIComponent(event.title)}%20${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                padding: '0.75rem',
-                                background: '#25D366',
-                                color: 'white',
-                                borderRadius: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                              title="Share on WhatsApp"
-                            >
-                              <FaWhatsapp size={20} />
-                            </a>
-                            <a
-                              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                padding: '0.75rem',
-                                background: '#1877F2',
-                                color: 'white',
-                                borderRadius: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                              title="Share on Facebook"
-                            >
-                              <FaFacebookF size={20} />
-                            </a>
-                            <a
-                              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                padding: '0.75rem',
-                                background: '#1DA1F2',
-                                color: 'white',
-                                borderRadius: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                              title="Share on Twitter"
-                            >
-                              <FaTwitter size={20} />
-                            </a>
-                            <a
-                              href={`https://www.tiktok.com/share?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                padding: '0.75rem',
-                                background: '#000000',
-                                color: 'white',
-                                borderRadius: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                              title="Share on TikTok"
-                            >
-                              <FaTiktok size={20} />
-                            </a>
-                          </div>
+                    {/* Share Button */}
+<div style={{ position: 'relative' }}>
+  <button
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setActiveShareId(activeShareId === event._id ? null : event._id);
+    }}
+    style={{
+      background: 'none',
+      border: 'none',
+      fontSize: '1.2rem',
+      cursor: 'pointer',
+      padding: '8px',
+      borderRadius: '50%',
+      transition: 'all 0.2s',
+      color: 'var(--earth-600)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.background = 'var(--earth-100)';
+      e.currentTarget.style.color = 'var(--earth-800)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.background = 'none';
+      e.currentTarget.style.color = 'var(--earth-600)';
+    }}
+    title="Share event"
+  >
+    <FaShareAlt size={18} />
+  </button>
+  
+  {activeShareId === event._id && (
+    <div style={{
+      position: 'absolute',
+      top: '100%',
+      right: 0,
+      background: 'white',
+      borderRadius: '16px',
+      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+      padding: '1rem',
+      zIndex: 50,
+      minWidth: '280px',
+      border: '1px solid var(--earth-200)',
+      animation: 'slideDown 0.2s ease'
+    }}>
+      <p style={{ 
+        fontSize: '0.875rem', 
+        fontWeight: '600', 
+        color: 'var(--earth-700)',
+        marginBottom: '0.75rem',
+        paddingBottom: '0.5rem',
+        borderBottom: '1px solid var(--earth-200)'
+      }}>
+        Share this event
+      </p>
 
-                          <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(3, 1fr)',
-                            gap: '0.5rem'
-                          }}>
-                            <a
-                              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                padding: '0.75rem',
-                                background: '#0A66C2',
-                                color: 'white',
-                                borderRadius: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                              title="Share on LinkedIn"
-                            >
-                              <FaLinkedinIn size={18} />
-                            </a>
-                            <a
-                              href={`mailto:?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent('Check out this event: ' + window.location.origin + '/app/events/' + event._id)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                padding: '0.75rem',
-                                background: '#EA4335',
-                                color: 'white',
-                                borderRadius: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                              title="Share via Email"
-                            >
-                              <FaEnvelope size={18} />
-                            </a>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(window.location.origin + '/app/events/' + event._id);
-                                toast.success('Link copied!');
-                                setActiveShareId(null);
-                              }}
-                              style={{
-                                padding: '0.75rem',
-                                background: 'var(--earth-600)',
-                                color: 'white',
-                                borderRadius: '8px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--earth-700)'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--earth-600)'}
-                              title="Copy link"
-                            >
-                              <FaLink size={18} />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '0.75rem',
+        marginBottom: '0.75rem'
+      }}>
+        {/* WhatsApp */}
+        <a
+          href={`https://wa.me/?text=${encodeURIComponent(event.title)}%20${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg, #25D366, #128C7E)',
+            color: 'white',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(37, 211, 102, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <FaWhatsapp size={24} />
+          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>WhatsApp</span>
+        </a>
+
+        {/* Facebook */}
+        <a
+          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg, #1877F2, #0E5EBD)',
+            color: 'white',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(24, 119, 242, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <FaFacebookF size={24} />
+          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Facebook</span>
+        </a>
+
+        {/* Twitter */}
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg, #1DA1F2, #0C7ABF)',
+            color: 'white',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(29, 161, 242, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <FaTwitter size={24} />
+          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Twitter</span>
+        </a>
+
+        {/* TikTok */}
+        <a
+          href={`https://www.tiktok.com/share?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg, #000000, #333333)',
+            color: 'white',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <FaTiktok size={24} />
+          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>TikTok</span>
+        </a>
+      </div>
+
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '0.75rem'
+      }}>
+        {/* LinkedIn */}
+        <a
+          href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/app/events/' + event._id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg, #0A66C2, #004182)',
+            color: 'white',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(10, 102, 194, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <FaLinkedinIn size={24} />
+          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>LinkedIn</span>
+        </a>
+
+        {/* Email */}
+        <a
+          href={`mailto:?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent('Check out this event: ' + window.location.origin + '/app/events/' + event._id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg, #EA4335, #B23121)',
+            color: 'white',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(234, 67, 53, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <FaEnvelope size={24} />
+          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Email</span>
+        </a>
+
+        {/* Copy Link */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigator.clipboard.writeText(window.location.origin + '/app/events/' + event._id);
+            toast.success('Link copied!');
+            setActiveShareId(null);
+          }}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg, var(--earth-600), var(--earth-800))',
+            color: 'white',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            border: 'none',
+            cursor: 'pointer',
+            width: '100%'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px var(--earth-600)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <FaLink size={24} />
+          <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Copy Link</span>
+        </button>
+      </div>
+    </div>
+  )}
+</div>
                     
                     {user?.role === 'creator' && (
                       <button
