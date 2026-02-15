@@ -295,7 +295,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaWhatsapp size={24} />
+          <FaWhatsapp size={12} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>WhatsApp</span>
         </a>
 
@@ -328,7 +328,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaFacebookF size={24} />
+          <FaFacebookF size={12} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Facebook</span>
         </a>
 
@@ -361,7 +361,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaTwitter size={24} />
+          <FaTwitter size={12} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Twitter</span>
         </a>
 
@@ -394,7 +394,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaTiktok size={18} />
+          <FaTiktok size={12} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>TikTok</span>
         </a>
       </div>
@@ -433,7 +433,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaLinkedinIn size={24} />
+          <FaLinkedinIn size={12} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>LinkedIn</span>
         </a>
 
@@ -466,7 +466,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaEnvelope size={24} />
+          <FaEnvelope size={12} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Email</span>
         </a>
 
@@ -503,7 +503,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaLink size={24} />
+          <FaLink size={12} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>Copy Link</span>
         </button>
       </div>
