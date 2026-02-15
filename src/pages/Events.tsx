@@ -394,7 +394,7 @@ export default function Events() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          <FaTiktok size={24} />
+          <FaTiktok size={18} />
           <span style={{ fontSize: '0.625rem', fontWeight: '500' }}>TikTok</span>
         </a>
       </div>
