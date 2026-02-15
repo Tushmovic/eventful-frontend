@@ -5,9 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell,
-  LineChart, Line, TooltipProps
+  LineChart, Line
 } from 'recharts';
-import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -50,13 +49,6 @@ const formatTooltipValue = (value: any): string => {
     return value.toLocaleString();
   }
   return '0';
-};
-
-const formatCurrencyValue = (value: any): string => {
-  if (typeof value === 'number') {
-    return `₦${value.toLocaleString()}`;
-  }
-  return '₦0';
 };
 
 export default function Analytics() {
@@ -255,8 +247,11 @@ export default function Analytics() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => {
-                    const percentage = percent ? (percent * 100).toFixed(0) : '0';
-                    return `${name} ${percentage}%`;
+                    // 🔥 FIX: Handle undefined values safely
+                    const safeName = name || '';
+                    const safePercent = typeof percent === 'number' ? percent : 0;
+                    const percentage = (safePercent * 100).toFixed(0);
+                    return `${safeName} ${percentage}%`;
                   }}
                   outerRadius={80}
                   fill="#8884d8"
@@ -294,7 +289,6 @@ export default function Analytics() {
               <YAxis />
               <Tooltip 
                 formatter={(value: any) => {
-                  // 🔥 FIX: Handle undefined value
                   const numValue = typeof value === 'number' ? value : 0;
                   return [`₦${numValue.toLocaleString()}`, 'Revenue'];
                 }}
