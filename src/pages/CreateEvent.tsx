@@ -106,12 +106,12 @@ export default function CreateEvent() {
     setLoading(true);
 
     try {
-      // First create event - send price as Naira (backend will convert to kobo)
+      // First create event - send price in kobo (multiply Naira amount by 100)
       const eventResponse = await axios.post(
         `${API_URL}/events`,
         {
           ...formData,
-          ticketPrice: formData.ticketPrice
+          ticketPrice: Math.round(formData.ticketPrice * 100)
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -643,7 +643,7 @@ export default function CreateEvent() {
                 }}
               />
               <small style={{ color: 'var(--earth-500)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
-                Enter price in Naira (e.g., 5000 for ₦5,000)
+                Enter price in Naira (e.g., 5000 for ₦5,000). Converted to kobo for payment processing.
               </small>
             </div>
 

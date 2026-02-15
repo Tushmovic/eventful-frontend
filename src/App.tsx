@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
 import MyTickets from './pages/MyTickets';
+import Bookmarks from './pages/Bookmarks';
 import CreateEvent from './pages/CreateEvent';
 import Analytics from './pages/Analytics';
 import VerifyTicket from './pages/VerifyTicket';
@@ -88,6 +89,7 @@ function App() {
               <Route path="events" element={<Events />} />
               <Route path="events/:id" element={<EventDetails />} />
               <Route path="my-tickets" element={<MyTickets />} />
+              <Route path="bookmarks" element={<Bookmarks />} />
               <Route path="create-event" element={<CreateEvent />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="verify" element={<VerifyTicket />} />

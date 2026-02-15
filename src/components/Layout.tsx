@@ -10,7 +10,8 @@ import {
   HomeIcon,
   UserCircleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline';
 
 export default function Layout() {
@@ -263,6 +264,31 @@ export default function Layout() {
             >
               <TicketIcon style={{ width: '1.25rem', height: '1.25rem' }} />
               <span>My Tickets</span>
+            </Link>
+            <Link 
+              to="/app/bookmarks" 
+              onClick={closeMobileMenu}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.75rem 1rem',
+                color: 'var(--earth-200)',
+                textDecoration: 'none',
+                borderRadius: '8px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--earth-700)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--earth-200)';
+              }}
+            >
+              <HeartIcon style={{ width: '1.25rem', height: '1.25rem' }} />
+              <span>Bookmarks</span>
             </Link>
 
             {user?.role === 'creator' && (
